@@ -1,0 +1,168 @@
+# Compiled class files
+*.class
+
+# Log files
+*.log
+*.log.*
+
+# Package Files
+*.jar
+*.war
+*.nar
+*.ear
+*.zip
+*.tar.gz
+*.rar
+
+# Maven
+target/
+pom.xml.tag
+pom.xml.releaseBackup
+pom.xml.versionsBackup
+pom.xml.next
+release.properties
+dependency-reduced-pom.xml
+buildNumber.properties
+.mvn/timing.properties
+.mvn/wrapper/maven-wrapper.jar
+
+# Gradle (if used in future)
+.gradle
+build/
+!gradle/wrapper/gradle-wrapper.jar
+!**/src/main/**/build/
+!**/src/test/**/build/
+
+# IDE - IntelliJ IDEA
+.idea/
+*.iws
+*.iml
+*.ipr
+out/
+.idea_modules/
+
+# IDE - Eclipse
+.classpath
+.project
+.settings/
+bin/
+.metadata
+
+# IDE - VS Code
+.vscode/
+*.code-workspace
+
+# IDE - NetBeans
+nbproject/private/
+build/
+nbbuild/
+dist/
+nbdist/
+.nb-gradle/
+
+# OS Files
+.DS_Store
+.DS_Store?
+._*
+.Spotlight-V100
+.Trashes
+ehthumbs.db
+Thumbs.db
+Desktop.ini
+
+# Spring Boot
+*.pid
+*.log.*
+spring-boot-*.log
+
+# Application properties (if containing secrets)
+# Uncomment if you have sensitive data in application.properties
+# bookstore-api/src/main/resources/application.properties
+
+# Environment variables
+.env
+.env.local
+.env.*.local
+
+# Temporary files
+*.tmp
+*.temp
+*.swp
+*.swo
+*~
+.cache/
+
+# Test coverage
+.nyc_output/
+coverage/
+*.lcov
+
+# Application specific
+application-local.properties
+application-dev.properties
+application-prod.properties
+
+# Frontend - Node.js
+node_modules/
+npm-debug.log*
+yarn-debug.log*
+yarn-error.log*
+lerna-debug.log*
+.pnpm-debug.log*
+
+# Frontend - Build outputs
+dist/
+build/
+.next/
+out/
+.nuxt/
+.vuepress/dist/
+.serverless/
+.fusebox/
+.dynamodb/
+.tern-port/
+
+# Frontend - Dependencies
+package-lock.json
+yarn.lock
+pnpm-lock.yaml
+
+# Frontend - Testing
+coverage/
+.nyc_output/
+*.lcov
+.jest/
+
+# Frontend - Environment
+.env.local
+.env.development.local
+.env.test.local
+.env.production.local
+
+# Frontend - Framework specific
+# React
+.cache/
+.parcel-cache/
+.next/
+out/
+
+# Vue
+.DS_Store
+node_modules
+dist
+dist-ssr
+*.local
+
+# Angular
+.angular/
+dist/
+
+# Svelte
+.svelte-kit/
+
+# Frontend - TypeScript
+*.tsbuildinfo
+next-env.d.ts
+
+# Frontend - Storybook
+storybook-static/
