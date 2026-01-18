@@ -31,14 +31,14 @@ public class BookService {
     private final CategoryRepository categoryRepository;
 
     public PageResponse<BookResponse> getAllBooks(int page, int size, String sortBy, String sortDir) {
-        Sort sort = sortDir.equalsIgnoreCase("desc") 
-                ? Sort.by(sortBy).descending() 
+        Sort sort = sortDir.equalsIgnoreCase("desc")
+                ? Sort.by(sortBy).descending()
                 : Sort.by(sortBy).ascending();
         Pageable pageable = PageRequest.of(page, size, sort);
-        
+
         Page<BookResponse> bookPage = bookRepository.findAll(pageable)
                 .map(BookResponse::fromEntity);
-        
+
         return PageResponse.fromPage(bookPage);
     }
 
@@ -80,16 +80,20 @@ public class BookService {
             int size,
             String sortBy,
             String sortDir) {
-        
-        Sort sort = sortDir.equalsIgnoreCase("desc") 
-                ? Sort.by(sortBy).descending() 
-                : Sort.by(sortBy).ascending();
-        Pageable pageable = PageRequest.of(page, size, sort);
-        
+
+        // For native queries, we handle sorting in the SQL itself, so use unsorted pageable
+        Pageable pageable = PageRequest.of(page, size);
+
+        // Normalize empty strings to null for consistent null checking
+        String normalizedKeyword = (keyword != null && !keyword.trim().isEmpty()) ? keyword.trim() : null;
+
+        // Convert condition enum to string for native query
+        String conditionStr = (condition != null) ? condition.name() : null;
+
         Page<BookResponse> bookPage = bookRepository.advancedSearch(
-                keyword, categoryId, minPrice, maxPrice, condition, isRare, inStock, pageable)
+                        normalizedKeyword, categoryId, minPrice, maxPrice, conditionStr, isRare, inStock, pageable)
                 .map(BookResponse::fromEntity);
-        
+
         return PageResponse.fromPage(bookPage);
     }
 
@@ -151,8 +155,8 @@ public class BookService {
                 .orElseThrow(() -> new ResourceNotFoundException("Book not found with id: " + id));
 
         // Check if new ISBN conflicts with existing book
-        if (!book.getIsbn().equals(request.getIsbn()) && 
-            bookRepository.existsByIsbn(request.getIsbn())) {
+        if (!book.getIsbn().equals(request.getIsbn()) &&
+                bookRepository.existsByIsbn(request.getIsbn())) {
             throw new DuplicateResourceException("Book already exists with ISBN: " + request.getIsbn());
         }
 
@@ -164,7 +168,7 @@ public class BookService {
         book.setPublicationYear(request.getPublicationYear());
         book.setPrice(request.getPrice());
         book.setQuantity(request.getQuantity());
-        
+
         if (request.getBookCondition() != null) {
             book.setBookCondition(request.getBookCondition());
         }
@@ -193,11 +197,11 @@ public class BookService {
     public BookResponse updateBookQuantity(Long id, Integer quantity) {
         Book book = bookRepository.findById(id)
                 .orElseThrow(() -> new ResourceNotFoundException("Book not found with id: " + id));
-        
+
         if (quantity < 0) {
             throw new BadRequestException("Quantity cannot be negative");
         }
-        
+
         book.setQuantity(quantity);
         book = bookRepository.save(book);
         return BookResponse.fromEntity(book);
@@ -215,10 +219,10 @@ public class BookService {
     public BookResponse addCategoryToBook(Long bookId, Long categoryId) {
         Book book = bookRepository.findById(bookId)
                 .orElseThrow(() -> new ResourceNotFoundException("Book not found with id: " + bookId));
-        
+
         Category category = categoryRepository.findById(categoryId)
                 .orElseThrow(() -> new ResourceNotFoundException("Category not found with id: " + categoryId));
-        
+
         book.addCategory(category);
         book = bookRepository.save(book);
         return BookResponse.fromEntity(book);
@@ -228,10 +232,10 @@ public class BookService {
     public BookResponse removeCategoryFromBook(Long bookId, Long categoryId) {
         Book book = bookRepository.findById(bookId)
                 .orElseThrow(() -> new ResourceNotFoundException("Book not found with id: " + bookId));
-        
+
         Category category = categoryRepository.findById(categoryId)
                 .orElseThrow(() -> new ResourceNotFoundException("Category not found with id: " + categoryId));
-        
+
         book.removeCategory(category);
         book = bookRepository.save(book);
         return BookResponse.fromEntity(book);
