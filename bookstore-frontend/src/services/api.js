@@ -1,6 +1,15 @@
 import axios from 'axios';
 
-const API_BASE_URL = '/api';
+// API Base URL Configuration
+// Option 1: Use environment variable (recommended for flexibility)
+// Option 2: Hardcode your Render URL after deployment
+// 
+// For local development with local backend: '/api' (uses Vite proxy)
+// For connecting to Render: 'https://bookstore-api-xxxx.onrender.com/api'
+
+const API_BASE_URL = import.meta.env.VITE_API_URL 
+  ? `${import.meta.env.VITE_API_URL}/api`
+  : '/api';
 
 const api = axios.create({
   baseURL: API_BASE_URL,
