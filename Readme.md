@@ -10,6 +10,7 @@ A web-based bookstore management system with inventory tracking, online book bro
 - **Tyler Barnett** - Product Owner
 - **Muhaimin Jobayer** - Development Team
 - **Matthew Parra** - Development Team
+- **Russel Scales** - Development Team
 
 ## Technology Stack
 
