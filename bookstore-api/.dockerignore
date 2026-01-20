@@ -1,0 +1,42 @@
+# Git
+.git
+.gitignore
+
+# IDE
+.idea/
+*.iml
+*.ipr
+*.iws
+.vscode/
+*.code-workspace
+
+# Build outputs
+target/
+build/
+out/
+
+# Logs
+*.log
+logs/
+
+# OS files
+.DS_Store
+Thumbs.db
+
+# Documentation
+*.md
+docs/
+
+# Test files
+src/test/
+
+# Local config files (don't include secrets)
+application-local.properties
+application-dev.properties
+.env
+.env.*
+
+# Maven wrapper (we use Maven from Docker image)
+.mvn/
+mvnw
+mvnw.cmd
