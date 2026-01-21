@@ -20,7 +20,15 @@ public class CheckoutRequest {
     @Size(max = 500, message = "Notes must not exceed 500 characters")
     private String notes;
 
-    // For Cash on Delivery, we don't need payment details
-    // Payment method defaults to CASH_ON_DELIVERY
-    private String paymentMethod = "CASH_ON_DELIVERY";
+    // Payment method is ALWAYS Cash on Delivery - this field is ignored if provided
+    // The system only supports COD payment method
+    private String paymentMethod;
+    
+    /**
+     * Returns the payment method - always returns CASH_ON_DELIVERY
+     * regardless of what was set. This is the ONLY supported payment method.
+     */
+    public String getPaymentMethod() {
+        return "CASH_ON_DELIVERY";
+    }
 }
