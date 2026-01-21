@@ -60,10 +60,11 @@ public interface BookRepository extends JpaRepository<Book, Long> {
                                 Pageable pageable);
 
     // Advanced search with multiple filters - Fixed for PostgreSQL null handling
+    // Now includes ISBN in keyword search
     @Query(value = "SELECT DISTINCT b.* FROM books b " +
             "LEFT JOIN book_categories bc ON b.id = bc.book_id " +
             "LEFT JOIN categories c ON bc.category_id = c.id " +
-            "WHERE (:keyword IS NULL OR :keyword = '' OR LOWER(b.title) LIKE LOWER(CONCAT('%', :keyword, '%')) OR LOWER(b.author) LIKE LOWER(CONCAT('%', :keyword, '%'))) " +
+            "WHERE (:keyword IS NULL OR :keyword = '' OR LOWER(b.title) LIKE LOWER(CONCAT('%', :keyword, '%')) OR LOWER(b.author) LIKE LOWER(CONCAT('%', :keyword, '%')) OR LOWER(b.isbn) LIKE LOWER(CONCAT('%', :keyword, '%'))) " +
             "AND (:categoryId IS NULL OR c.id = :categoryId) " +
             "AND (:minPrice IS NULL OR b.price >= :minPrice) " +
             "AND (:maxPrice IS NULL OR b.price <= :maxPrice) " +
@@ -74,7 +75,7 @@ public interface BookRepository extends JpaRepository<Book, Long> {
             countQuery = "SELECT COUNT(DISTINCT b.id) FROM books b " +
                     "LEFT JOIN book_categories bc ON b.id = bc.book_id " +
                     "LEFT JOIN categories c ON bc.category_id = c.id " +
-                    "WHERE (:keyword IS NULL OR :keyword = '' OR LOWER(b.title) LIKE LOWER(CONCAT('%', :keyword, '%')) OR LOWER(b.author) LIKE LOWER(CONCAT('%', :keyword, '%'))) " +
+                    "WHERE (:keyword IS NULL OR :keyword = '' OR LOWER(b.title) LIKE LOWER(CONCAT('%', :keyword, '%')) OR LOWER(b.author) LIKE LOWER(CONCAT('%', :keyword, '%')) OR LOWER(b.isbn) LIKE LOWER(CONCAT('%', :keyword, '%'))) " +
                     "AND (:categoryId IS NULL OR c.id = :categoryId) " +
                     "AND (:minPrice IS NULL OR b.price >= :minPrice) " +
                     "AND (:maxPrice IS NULL OR b.price <= :maxPrice) " +
