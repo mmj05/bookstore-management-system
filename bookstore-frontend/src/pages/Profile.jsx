@@ -102,10 +102,10 @@ function Profile() {
       {message && <div className="alert alert-success">{message}</div>}
       {error && <div className="alert alert-error">{error}</div>}
 
-      <div className="grid grid-2">
+      <div className="profile-grid">
         {/* Profile Information */}
         <div className="card">
-          <div className="flex flex-between flex-center mb-20">
+          <div className="profile-card-header">
             <h3 className="card-title" style={{ marginBottom: 0 }}>Account Information</h3>
             {!editMode && (
               <button className="btn btn-secondary btn-sm" onClick={() => setEditMode(true)}>
@@ -116,7 +116,7 @@ function Profile() {
 
           {editMode ? (
             <form onSubmit={handleUpdateProfile}>
-              <div className="grid grid-2">
+              <div className="modal-form-grid">
                 <div className="form-group">
                   <label>First Name</label>
                   <input
