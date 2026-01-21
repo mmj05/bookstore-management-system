@@ -1,5 +1,7 @@
 package com.bookstore.entity;
 
+import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
+import com.fasterxml.jackson.annotation.JsonManagedReference;
 import jakarta.persistence.*;
 import lombok.*;
 
@@ -14,6 +16,8 @@ import java.util.List;
 @Builder
 @NoArgsConstructor
 @AllArgsConstructor
+@ToString(exclude = {"user", "items"})
+@EqualsAndHashCode(exclude = {"user", "items"})
 public class Order {
 
     @Id
@@ -25,10 +29,12 @@ public class Order {
 
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "user_id", nullable = false)
+    @JsonIgnoreProperties({"orders", "shoppingCart", "passwordHash"})
     private User user;
 
     @OneToMany(mappedBy = "order", cascade = CascadeType.ALL, orphanRemoval = true, fetch = FetchType.LAZY)
     @Builder.Default
+    @JsonManagedReference
     private List<OrderItem> items = new ArrayList<>();
 
     @Enumerated(EnumType.STRING)
@@ -95,17 +101,17 @@ public class Order {
 
     public void calculateTotals() {
         this.subtotal = items.stream()
-            .map(OrderItem::getLineTotal)
-            .reduce(BigDecimal.ZERO, BigDecimal::add);
-        
+                .map(OrderItem::getLineTotal)
+                .reduce(BigDecimal.ZERO, BigDecimal::add);
+
         // Tax rate: 8% (configurable)
         this.tax = subtotal.multiply(BigDecimal.valueOf(0.08)).setScale(2, java.math.RoundingMode.HALF_UP);
-        
+
         // Shipping cost: $5.99 flat rate or free for orders over $50
-        this.shippingCost = subtotal.compareTo(BigDecimal.valueOf(50)) >= 0 
-            ? BigDecimal.ZERO 
-            : BigDecimal.valueOf(5.99);
-        
+        this.shippingCost = subtotal.compareTo(BigDecimal.valueOf(50)) >= 0
+                ? BigDecimal.ZERO
+                : BigDecimal.valueOf(5.99);
+
         this.total = subtotal.add(tax).add(shippingCost);
     }
 }
