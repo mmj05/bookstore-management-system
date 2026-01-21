@@ -220,13 +220,13 @@ function Inventory() {
   };
 
   return (
-    <div className="container">
-      <div className="page-header flex flex-between flex-center">
+    <div className="container inventory-page">
+      <div className="page-header inventory-header">
         <div>
           <h1>Inventory Management</h1>
           <p className="text-muted">Manage books and categories</p>
         </div>
-        <div className="flex gap-10">
+        <div className="inventory-actions">
           <button className="btn btn-primary" onClick={openAddBook}>+ Add Book</button>
           <button className="btn btn-secondary" onClick={openAddCategory}>+ Add Category</button>
         </div>
@@ -237,7 +237,7 @@ function Inventory() {
 
       {/* Search */}
       <div className="card mb-20">
-        <form onSubmit={handleSearch} className="search-bar">
+        <form onSubmit={handleSearch} className="search-bar inventory-search">
           <input
             type="text"
             className="form-control"
@@ -257,65 +257,127 @@ function Inventory() {
           <div className="loading">Loading...</div>
         ) : (
           <>
-            <table className="table">
-              <thead>
-                <tr>
-                  <th>Title</th>
-                  <th>Author</th>
-                  <th>ISBN</th>
-                  <th>Price</th>
-                  <th>Quantity</th>
-                  <th>Condition</th>
-                  <th>Categories</th>
-                  <th>Actions</th>
-                </tr>
-              </thead>
-              <tbody>
-                {books.map(book => (
-                  <tr key={book.id}>
-                    <td>
+            {/* Mobile Card View */}
+            <div className="inventory-mobile-view">
+              {books.map(book => (
+                <div key={book.id} className="inventory-card">
+                  <div className="inventory-card-header">
+                    <div className="inventory-card-title">
                       {book.title}
-                      {book.isRare && <span className="badge badge-warning ml-10">Rare</span>}
-                    </td>
-                    <td>{book.author}</td>
-                    <td>{book.isbn}</td>
-                    <td>${book.price.toFixed(2)}</td>
-                    <td>
+                      {book.isRare && <span className="badge badge-warning">Rare</span>}
+                    </div>
+                    <div className="inventory-card-price">${book.price.toFixed(2)}</div>
+                  </div>
+                  <div className="inventory-card-details">
+                    <div className="inventory-card-row">
+                      <span className="inventory-card-label">Author:</span>
+                      <span>{book.author}</span>
+                    </div>
+                    <div className="inventory-card-row">
+                      <span className="inventory-card-label">ISBN:</span>
+                      <span>{book.isbn}</span>
+                    </div>
+                    <div className="inventory-card-row">
+                      <span className="inventory-card-label">Condition:</span>
+                      <span>{book.bookCondition}</span>
+                    </div>
+                    <div className="inventory-card-row">
+                      <span className="inventory-card-label">Categories:</span>
+                      <span>{book.categories?.map(c => c.name).join(', ') || '-'}</span>
+                    </div>
+                    <div className="inventory-card-row">
+                      <span className="inventory-card-label">Quantity:</span>
                       <input
                         type="number"
-                        className="form-control"
-                        style={{ width: '70px' }}
+                        className="form-control quantity-input"
                         value={book.quantity}
                         min="0"
                         onChange={(e) => handleUpdateQuantity(book.id, e.target.value)}
                       />
-                    </td>
-                    <td>{book.bookCondition}</td>
-                    <td>
-                      {book.categories?.map(c => c.name).join(', ') || '-'}
-                    </td>
-                    <td>
-                      <button 
-                        className="btn btn-secondary btn-sm"
-                        onClick={() => openEditBook(book)}
-                      >
-                        Edit
-                      </button>
-                      <button 
-                        className="btn btn-danger btn-sm"
-                        style={{ marginLeft: '5px' }}
-                        onClick={() => handleDeleteBook(book.id)}
-                      >
-                        Delete
-                      </button>
-                    </td>
+                    </div>
+                  </div>
+                  <div className="inventory-card-actions">
+                    <button 
+                      className="btn btn-secondary btn-sm"
+                      onClick={() => openEditBook(book)}
+                    >
+                      Edit
+                    </button>
+                    <button 
+                      className="btn btn-danger btn-sm"
+                      onClick={() => handleDeleteBook(book.id)}
+                    >
+                      Delete
+                    </button>
+                  </div>
+                </div>
+              ))}
+            </div>
+
+            {/* Desktop Table View */}
+            <div className="table-responsive">
+              <table className="table inventory-table">
+                <thead>
+                  <tr>
+                    <th>Title</th>
+                    <th>Author</th>
+                    <th>ISBN</th>
+                    <th>Price</th>
+                    <th>Quantity</th>
+                    <th>Condition</th>
+                    <th>Categories</th>
+                    <th className="actions-column">Actions</th>
                   </tr>
-                ))}
-              </tbody>
-            </table>
+                </thead>
+                <tbody>
+                  {books.map(book => (
+                    <tr key={book.id}>
+                      <td data-label="Title">
+                        <div className="title-cell">
+                          {book.title}
+                          {book.isRare && <span className="badge badge-warning">Rare</span>}
+                        </div>
+                      </td>
+                      <td data-label="Author">{book.author}</td>
+                      <td data-label="ISBN">{book.isbn}</td>
+                      <td data-label="Price">${book.price.toFixed(2)}</td>
+                      <td data-label="Quantity">
+                        <input
+                          type="number"
+                          className="form-control quantity-input"
+                          value={book.quantity}
+                          min="0"
+                          onChange={(e) => handleUpdateQuantity(book.id, e.target.value)}
+                        />
+                      </td>
+                      <td data-label="Condition">{book.bookCondition}</td>
+                      <td data-label="Categories">
+                        {book.categories?.map(c => c.name).join(', ') || '-'}
+                      </td>
+                      <td data-label="Actions" className="actions-column">
+                        <div className="action-buttons">
+                          <button 
+                            className="btn btn-secondary btn-sm"
+                            onClick={() => openEditBook(book)}
+                          >
+                            Edit
+                          </button>
+                          <button 
+                            className="btn btn-danger btn-sm"
+                            onClick={() => handleDeleteBook(book.id)}
+                          >
+                            Delete
+                          </button>
+                        </div>
+                      </td>
+                    </tr>
+                  ))}
+                </tbody>
+              </table>
+            </div>
 
             {totalPages > 1 && (
-              <div className="flex flex-center gap-10 mt-20" style={{ justifyContent: 'center' }}>
+              <div className="pagination-controls">
                 <button 
                   className="btn btn-secondary btn-sm"
                   onClick={() => setPage(p => Math.max(0, p - 1))}
@@ -323,7 +385,7 @@ function Inventory() {
                 >
                   Previous
                 </button>
-                <span>Page {page + 1} of {totalPages}</span>
+                <span className="pagination-info">Page {page + 1} of {totalPages}</span>
                 <button 
                   className="btn btn-secondary btn-sm"
                   onClick={() => setPage(p => Math.min(totalPages - 1, p + 1))}
@@ -340,60 +402,83 @@ function Inventory() {
       {/* Categories Section */}
       <div className="card mt-20">
         <h3 className="card-title">Categories ({categories.length})</h3>
-        <table className="table">
-          <thead>
-            <tr>
-              <th>Name</th>
-              <th>Description</th>
-              <th>Books</th>
-              <th>Actions</th>
-            </tr>
-          </thead>
-          <tbody>
-            {categories.map(cat => (
-              <tr key={cat.id}>
-                <td>{cat.name}</td>
-                <td>{cat.description || '-'}</td>
-                <td>{cat.bookCount}</td>
-                <td>
-                  <button 
-                    className="btn btn-secondary btn-sm"
-                    onClick={() => openEditCategory(cat)}
-                  >
-                    Edit
-                  </button>
-                  <button 
-                    className="btn btn-danger btn-sm"
-                    style={{ marginLeft: '5px' }}
-                    onClick={() => handleDeleteCategory(cat.id)}
-                  >
-                    Delete
-                  </button>
-                </td>
+        
+        {/* Mobile Card View for Categories */}
+        <div className="inventory-mobile-view">
+          {categories.map(cat => (
+            <div key={cat.id} className="inventory-card category-card">
+              <div className="inventory-card-header">
+                <div className="inventory-card-title">{cat.name}</div>
+                <div className="inventory-card-count">{cat.bookCount} books</div>
+              </div>
+              {cat.description && (
+                <div className="inventory-card-description">{cat.description}</div>
+              )}
+              <div className="inventory-card-actions">
+                <button 
+                  className="btn btn-secondary btn-sm"
+                  onClick={() => openEditCategory(cat)}
+                >
+                  Edit
+                </button>
+                <button 
+                  className="btn btn-danger btn-sm"
+                  onClick={() => handleDeleteCategory(cat.id)}
+                >
+                  Delete
+                </button>
+              </div>
+            </div>
+          ))}
+        </div>
+
+        {/* Desktop Table View for Categories */}
+        <div className="table-responsive">
+          <table className="table inventory-table">
+            <thead>
+              <tr>
+                <th>Name</th>
+                <th>Description</th>
+                <th>Books</th>
+                <th className="actions-column">Actions</th>
               </tr>
-            ))}
-          </tbody>
-        </table>
+            </thead>
+            <tbody>
+              {categories.map(cat => (
+                <tr key={cat.id}>
+                  <td data-label="Name">{cat.name}</td>
+                  <td data-label="Description">{cat.description || '-'}</td>
+                  <td data-label="Books">{cat.bookCount}</td>
+                  <td data-label="Actions" className="actions-column">
+                    <div className="action-buttons">
+                      <button 
+                        className="btn btn-secondary btn-sm"
+                        onClick={() => openEditCategory(cat)}
+                      >
+                        Edit
+                      </button>
+                      <button 
+                        className="btn btn-danger btn-sm"
+                        onClick={() => handleDeleteCategory(cat.id)}
+                      >
+                        Delete
+                      </button>
+                    </div>
+                  </td>
+                </tr>
+              ))}
+            </tbody>
+          </table>
+        </div>
       </div>
 
       {/* Book Modal */}
       {showBookModal && (
-        <div style={{
-          position: 'fixed',
-          top: 0,
-          left: 0,
-          right: 0,
-          bottom: 0,
-          background: 'rgba(0,0,0,0.5)',
-          display: 'flex',
-          alignItems: 'center',
-          justifyContent: 'center',
-          zIndex: 1000,
-        }}>
-          <div className="card" style={{ width: '600px', maxHeight: '90vh', overflow: 'auto' }}>
+        <div className="modal-overlay">
+          <div className="modal-content modal-lg">
             <h3 className="card-title">{editingBook ? 'Edit Book' : 'Add New Book'}</h3>
             <form onSubmit={handleBookSubmit}>
-              <div className="grid grid-2">
+              <div className="modal-form-grid">
                 <div className="form-group">
                   <label>ISBN *</label>
                   <input
@@ -416,7 +501,7 @@ function Inventory() {
                 </div>
               </div>
               
-              <div className="grid grid-2">
+              <div className="modal-form-grid">
                 <div className="form-group">
                   <label>Author *</label>
                   <input
@@ -448,7 +533,7 @@ function Inventory() {
                 />
               </div>
 
-              <div className="grid grid-2">
+              <div className="modal-form-grid">
                 <div className="form-group">
                   <label>Price *</label>
                   <input
@@ -472,7 +557,7 @@ function Inventory() {
                 </div>
               </div>
 
-              <div className="grid grid-2">
+              <div className="modal-form-grid">
                 <div className="form-group">
                   <label>Publication Year</label>
                   <input
@@ -518,7 +603,7 @@ function Inventory() {
                 <small className="text-muted">Hold Ctrl/Cmd to select multiple</small>
               </div>
 
-              <div className="form-group">
+              <div className="form-group checkbox-group">
                 <label>
                   <input
                     type="checkbox"
@@ -528,7 +613,7 @@ function Inventory() {
                 </label>
               </div>
 
-              <div className="flex gap-10">
+              <div className="modal-actions">
                 <button type="submit" className="btn btn-primary">
                   {editingBook ? 'Update Book' : 'Add Book'}
                 </button>
@@ -547,19 +632,8 @@ function Inventory() {
 
       {/* Category Modal */}
       {showCategoryModal && (
-        <div style={{
-          position: 'fixed',
-          top: 0,
-          left: 0,
-          right: 0,
-          bottom: 0,
-          background: 'rgba(0,0,0,0.5)',
-          display: 'flex',
-          alignItems: 'center',
-          justifyContent: 'center',
-          zIndex: 1000,
-        }}>
-          <div className="card" style={{ width: '400px' }}>
+        <div className="modal-overlay">
+          <div className="modal-content modal-sm">
             <h3 className="card-title">{editingCategory ? 'Edit Category' : 'Add New Category'}</h3>
             <form onSubmit={handleCategorySubmit}>
               <div className="form-group">
@@ -583,7 +657,7 @@ function Inventory() {
                 />
               </div>
 
-              <div className="flex gap-10">
+              <div className="modal-actions">
                 <button type="submit" className="btn btn-primary">
                   {editingCategory ? 'Update Category' : 'Add Category'}
                 </button>
