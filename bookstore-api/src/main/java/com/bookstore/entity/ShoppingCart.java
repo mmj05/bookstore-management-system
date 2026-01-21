@@ -1,5 +1,8 @@
 package com.bookstore.entity;
 
+import com.fasterxml.jackson.annotation.JsonIgnore;
+import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
+import com.fasterxml.jackson.annotation.JsonManagedReference;
 import jakarta.persistence.*;
 import lombok.*;
 
@@ -14,6 +17,8 @@ import java.util.List;
 @Builder
 @NoArgsConstructor
 @AllArgsConstructor
+@ToString(exclude = {"user", "items"})
+@EqualsAndHashCode(exclude = {"user", "items"})
 public class ShoppingCart {
 
     @Id
@@ -22,10 +27,13 @@ public class ShoppingCart {
 
     @OneToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "user_id", nullable = false, unique = true)
+    @JsonIgnoreProperties({"shoppingCart", "orders", "passwordHash"})
     private User user;
 
-    @OneToMany(mappedBy = "cart", cascade = CascadeType.ALL, orphanRemoval = true, fetch = FetchType.LAZY)
+    // Removed orphanRemoval = true to avoid conflicts with manual deletion in checkout
+    @OneToMany(mappedBy = "cart", cascade = CascadeType.ALL, fetch = FetchType.LAZY)
     @Builder.Default
+    @JsonManagedReference
     private List<CartItem> items = new ArrayList<>();
 
     @Column(nullable = false, updatable = false)
@@ -62,13 +70,13 @@ public class ShoppingCart {
 
     public BigDecimal getTotal() {
         return items.stream()
-            .map(item -> item.getBook().getPrice().multiply(BigDecimal.valueOf(item.getQuantity())))
-            .reduce(BigDecimal.ZERO, BigDecimal::add);
+                .map(item -> item.getBook().getPrice().multiply(BigDecimal.valueOf(item.getQuantity())))
+                .reduce(BigDecimal.ZERO, BigDecimal::add);
     }
 
     public int getTotalItems() {
         return items.stream()
-            .mapToInt(CartItem::getQuantity)
-            .sum();
+                .mapToInt(CartItem::getQuantity)
+                .sum();
     }
 }
