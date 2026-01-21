@@ -82,9 +82,9 @@ function Orders() {
       ) : (
         <div>
           {orders.map(order => (
-            <div key={order.id} className="card">
-              <div className="flex flex-between flex-center">
-                <div>
+            <div key={order.id} className="card order-card">
+              <div className="order-card-header">
+                <div className="order-card-info">
                   <h3 className="card-title" style={{ marginBottom: '5px' }}>
                     Order #{order.orderNumber}
                   </h3>
@@ -92,9 +92,9 @@ function Orders() {
                     Placed on {formatDate(order.createdAt)}
                   </p>
                 </div>
-                <div className="text-right">
+                <div className="order-card-status">
                   <span className={getStatusBadge(order.status)}>{order.status}</span>
-                  <p style={{ fontSize: '1.25rem', fontWeight: 'bold', margin: '10px 0 0 0' }}>
+                  <p style={{ fontSize: '1.25rem', fontWeight: 'bold', margin: '10px 0 0 0', color: 'var(--success-600)' }}>
                     ${order.total.toFixed(2)}
                   </p>
                 </div>
@@ -102,8 +102,8 @@ function Orders() {
 
               <hr />
 
-              <div className="flex flex-between flex-center">
-                <div>
+              <div className="order-card-footer">
+                <div className="order-card-meta">
                   <p style={{ margin: '0 0 5px 0' }}>
                     <strong>Items:</strong> {order.items?.length || 0}
                   </p>
@@ -113,7 +113,7 @@ function Orders() {
                     </p>
                   )}
                 </div>
-                <div className="flex gap-10">
+                <div className="order-card-actions">
                   <button 
                     className="btn btn-secondary btn-sm"
                     onClick={() => setExpandedOrder(expandedOrder === order.id ? null : order.id)}
@@ -132,34 +132,36 @@ function Orders() {
               </div>
 
               {expandedOrder === order.id && (
-                <div className="mt-20" style={{ background: '#f8f9fa', padding: '15px', borderRadius: '4px' }}>
+                <div className="order-expanded-details">
                   <h4>Order Items</h4>
-                  <table className="table">
-                    <thead>
-                      <tr>
-                        <th>Book</th>
-                        <th>Price</th>
-                        <th>Quantity</th>
-                        <th>Total</th>
-                      </tr>
-                    </thead>
-                    <tbody>
-                      {order.items?.map(item => (
-                        <tr key={item.id}>
-                          <td>
-                            <strong>{item.bookTitle}</strong>
-                            <br />
-                            <small className="text-muted">by {item.bookAuthor}</small>
-                          </td>
-                          <td>${item.priceAtPurchase.toFixed(2)}</td>
-                          <td>{item.quantity}</td>
-                          <td>${item.lineTotal.toFixed(2)}</td>
+                  <div className="table-responsive">
+                    <table className="table">
+                      <thead>
+                        <tr>
+                          <th>Book</th>
+                          <th>Price</th>
+                          <th>Quantity</th>
+                          <th>Total</th>
                         </tr>
-                      ))}
-                    </tbody>
-                  </table>
+                      </thead>
+                      <tbody>
+                        {order.items?.map(item => (
+                          <tr key={item.id}>
+                            <td>
+                              <strong>{item.bookTitle}</strong>
+                              <br />
+                              <small className="text-muted">by {item.bookAuthor}</small>
+                            </td>
+                            <td>${item.priceAtPurchase.toFixed(2)}</td>
+                            <td>{item.quantity}</td>
+                            <td>${item.lineTotal.toFixed(2)}</td>
+                          </tr>
+                        ))}
+                      </tbody>
+                    </table>
+                  </div>
 
-                  <div className="grid grid-2 mt-10">
+                  <div className="order-summary-grid">
                     <div>
                       <h4>Shipping Address</h4>
                       <p>{order.shippingAddress}</p>
