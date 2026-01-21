@@ -213,11 +213,16 @@ function Users() {
                     </select>
                   </td>
                   <td>
-                    {user.isActive ? (
-                      <span className="badge badge-success">Active</span>
-                    ) : (
-                      <span className="badge badge-danger">Inactive</span>
-                    )}
+                    <div className="flex gap-5" style={{ flexWrap: 'wrap' }}>
+                      {user.isActive ? (
+                        <span className="badge badge-success">Active</span>
+                      ) : (
+                        <span className="badge badge-danger">Inactive</span>
+                      )}
+                      {user.isLocked && (
+                        <span className="badge badge-warning">Locked</span>
+                      )}
+                    </div>
                   </td>
                   <td>{formatDate(user.createdAt)}</td>
                   <td>{formatDate(user.lastLoginAt)}</td>
@@ -238,12 +243,14 @@ function Users() {
                           Activate
                         </button>
                       )}
-                      <button 
-                        className="btn btn-secondary btn-sm"
-                        onClick={() => handleUnlock(user.id)}
-                      >
-                        Unlock
-                      </button>
+                      {user.isLocked && (
+                        <button 
+                          className="btn btn-warning btn-sm"
+                          onClick={() => handleUnlock(user.id)}
+                        >
+                          Unlock
+                        </button>
+                      )}
                     </div>
                   </td>
                 </tr>
