@@ -63,10 +63,17 @@ export function CartProvider({ children }) {
   const clearCart = async () => {
     try {
       await cartAPI.clear();
-      setCart(null);
     } catch (error) {
-      throw error;
+      // Cart may already be cleared (e.g., after checkout), that's okay
+      console.log('Cart clear API call failed, cart may already be empty');
     }
+    // Always reset local state
+    setCart({ items: [], totalItems: 0, subtotal: 0, estimatedTax: 0, estimatedShipping: 0, estimatedTotal: 0 });
+  };
+
+  // Reset cart state locally without API call (used after checkout)
+  const resetCart = () => {
+    setCart({ items: [], totalItems: 0, subtotal: 0, estimatedTax: 0, estimatedShipping: 0, estimatedTotal: 0 });
   };
 
   const cartItemCount = cart?.totalItems || 0;
@@ -79,6 +86,7 @@ export function CartProvider({ children }) {
     updateQuantity,
     removeFromCart,
     clearCart,
+    resetCart,
     cartItemCount,
   };
 
