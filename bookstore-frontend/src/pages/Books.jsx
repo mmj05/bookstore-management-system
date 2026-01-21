@@ -4,6 +4,55 @@ import { booksAPI, categoriesAPI } from '../services/api';
 import { useAuth } from '../context/AuthContext';
 import { useCart } from '../context/CartContext';
 
+// Book card component that looks like a real book
+function BookCard({ book, index, onAddToCart, isAuthenticated, isCustomer }) {
+  const colorClass = `book-color-${(index % 10) + 1}`;
+  
+  const handleAddToCart = (e) => {
+    e.preventDefault();
+    e.stopPropagation();
+    onAddToCart(book.id);
+  };
+
+  return (
+    <Link to={`/books/${book.id}`} style={{ textDecoration: 'none' }}>
+      <div className={`book-card ${colorClass}`}>
+        <div className="book-card-inner">
+          <div className="book-spine">
+            <span className="book-spine-title">{book.title}</span>
+          </div>
+          <div className="book-cover">
+            <div className="book-pages"></div>
+            <div>
+              <h3 className="book-title">{book.title}</h3>
+              <p className="book-author">by {book.author}</p>
+            </div>
+            <div className="book-meta">
+              <div className="book-price">${book.price.toFixed(2)}</div>
+              <div className="book-category">
+                {book.categories?.map(c => c.name).join(', ') || 'Uncategorized'}
+              </div>
+              <span className={`book-stock ${book.quantity > 0 ? 'in-stock' : 'out-of-stock'}`}>
+                {book.quantity > 0 ? `In Stock (${book.quantity})` : 'Out of Stock'}
+              </span>
+              {isAuthenticated && isCustomer && book.quantity > 0 && (
+                <div className="book-actions">
+                  <button 
+                    className="btn btn-primary btn-sm"
+                    onClick={handleAddToCart}
+                  >
+                    Add to Cart
+                  </button>
+                </div>
+              )}
+            </div>
+          </div>
+        </div>
+      </div>
+    </Link>
+  );
+}
+
 function Books() {
   const [books, setBooks] = useState([]);
   const [categories, setCategories] = useState([]);
@@ -13,6 +62,7 @@ function Books() {
   
   // Search and filter state
   const [searchKeyword, setSearchKeyword] = useState('');
+  const [isbnSearch, setIsbnSearch] = useState('');
   const [selectedCategory, setSelectedCategory] = useState('');
   const [minPrice, setMinPrice] = useState('');
   const [maxPrice, setMaxPrice] = useState('');
@@ -21,6 +71,7 @@ function Books() {
   // Pagination
   const [page, setPage] = useState(0);
   const [totalPages, setTotalPages] = useState(0);
+  const [totalElements, setTotalElements] = useState(0);
   
   const { isAuthenticated, isCustomer } = useAuth();
   const { addToCart } = useCart();
@@ -41,11 +92,16 @@ function Books() {
     try {
       const params = {
         page,
-        size: 12,
+        size: 15,
       };
       
       // Only add non-empty filter params
-      if (searchKeyword) params.keyword = searchKeyword;
+      // If ISBN is provided, use it as the keyword (ISBN search takes priority)
+      if (isbnSearch) {
+        params.keyword = isbnSearch;
+      } else if (searchKeyword) {
+        params.keyword = searchKeyword;
+      }
       if (selectedCategory) params.categoryId = selectedCategory;
       if (minPrice) params.minPrice = minPrice;
       if (maxPrice) params.maxPrice = maxPrice;
@@ -54,13 +110,14 @@ function Books() {
       const response = await booksAPI.filter(params);
       setBooks(response.data.data.content);
       setTotalPages(response.data.data.totalPages);
+      setTotalElements(response.data.data.totalElements);
     } catch (err) {
       setError('Error loading books');
       console.error(err);
     } finally {
       setLoading(false);
     }
-  }, [page, searchKeyword, selectedCategory, minPrice, maxPrice, inStockOnly]);
+  }, [page, searchKeyword, isbnSearch, selectedCategory, minPrice, maxPrice, inStockOnly]);
 
   useEffect(() => {
     fetchCategories();
@@ -98,23 +155,30 @@ function Books() {
 
   const handleSearchKeywordChange = (value) => {
     setSearchKeyword(value);
+    setIsbnSearch(''); // Clear ISBN when using general search
     setPage(0);
   };
 
-  const handleAddToCart = async (e, bookId) => {
-    e.preventDefault();
-    e.stopPropagation();
+  const handleIsbnSearchChange = (value) => {
+    setIsbnSearch(value);
+    setSearchKeyword(''); // Clear general search when using ISBN
+    setPage(0);
+  };
+
+  const handleAddToCart = async (bookId) => {
     try {
       await addToCart(bookId, 1);
       setMessage('Book added to cart!');
       setTimeout(() => setMessage(''), 3000);
     } catch (err) {
       setError(err.response?.data?.message || 'Error adding to cart');
+      setTimeout(() => setError(''), 3000);
     }
   };
 
   const clearFilters = () => {
     setSearchKeyword('');
+    setIsbnSearch('');
     setSelectedCategory('');
     setMinPrice('');
     setMaxPrice('');
@@ -122,11 +186,15 @@ function Books() {
     setPage(0);
   };
 
+  const hasActiveFilters = searchKeyword || isbnSearch || selectedCategory || minPrice || maxPrice || inStockOnly;
+
   return (
-    <div className="container">
+    <div className="container" style={{ paddingTop: '30px', paddingBottom: '60px' }}>
       <div className="page-header">
         <h1>Browse Books</h1>
-        <p className="text-muted">Search and filter our collection</p>
+        <p className="text-muted">
+          Discover {totalElements} books in our collection
+        </p>
       </div>
 
       {message && <div className="alert alert-success">{message}</div>}
@@ -134,20 +202,57 @@ function Books() {
 
       {/* Search and Filter */}
       <div className="card mb-20">
-        <div className="search-bar">
+        <div style={{ display: 'grid', gridTemplateColumns: '1fr auto 1fr', gap: '12px', marginBottom: '20px', alignItems: 'center' }}>
           <input
             type="text"
             className="form-control"
-            placeholder="Search by title, author, or ISBN..."
+            placeholder="Search by title or author..."
             value={searchKeyword}
             onChange={(e) => handleSearchKeywordChange(e.target.value)}
+            style={{ margin: 0 }}
           />
+          <span style={{ color: 'var(--gray-400)', fontWeight: '500', fontSize: '0.85rem' }}>OR</span>
+          <div style={{ position: 'relative' }}>
+            <input
+              type="text"
+              className="form-control"
+              placeholder="Search by ISBN..."
+              value={isbnSearch}
+              onChange={(e) => handleIsbnSearchChange(e.target.value)}
+              style={{ 
+                margin: 0,
+                paddingLeft: '40px'
+              }}
+            />
+            <svg 
+              width="18" 
+              height="18" 
+              viewBox="0 0 24 24" 
+              fill="none" 
+              stroke="currentColor" 
+              strokeWidth="2" 
+              strokeLinecap="round" 
+              strokeLinejoin="round"
+              style={{
+                position: 'absolute',
+                left: '12px',
+                top: '50%',
+                transform: 'translateY(-50%)',
+                color: 'var(--gray-400)'
+              }}
+            >
+              <rect x="3" y="4" width="18" height="18" rx="2" ry="2"></rect>
+              <line x1="16" y1="2" x2="16" y2="6"></line>
+              <line x1="8" y1="2" x2="8" y2="6"></line>
+              <line x1="3" y1="10" x2="21" y2="10"></line>
+            </svg>
+          </div>
         </div>
         
         <div className="filter-group">
           <select
             className="form-control"
-            style={{ width: 'auto' }}
+            style={{ width: 'auto', minWidth: '180px' }}
             value={selectedCategory}
             onChange={(e) => handleCategoryChange(e.target.value)}
           >
@@ -160,7 +265,7 @@ function Books() {
           <input
             type="number"
             className="form-control"
-            style={{ width: '120px' }}
+            style={{ width: '130px' }}
             placeholder="Min Price"
             value={minPrice}
             onChange={(e) => handleMinPriceChange(e.target.value)}
@@ -169,24 +274,27 @@ function Books() {
           <input
             type="number"
             className="form-control"
-            style={{ width: '120px' }}
+            style={{ width: '130px' }}
             placeholder="Max Price"
             value={maxPrice}
             onChange={(e) => handleMaxPriceChange(e.target.value)}
           />
           
-          <label style={{ display: 'flex', alignItems: 'center', gap: '5px' }}>
+          <label style={{ display: 'flex', alignItems: 'center', gap: '8px', cursor: 'pointer' }}>
             <input
               type="checkbox"
               checked={inStockOnly}
               onChange={(e) => handleInStockChange(e.target.checked)}
+              style={{ width: '18px', height: '18px', accentColor: 'var(--accent-500)' }}
             />
-            In Stock Only
+            <span>In Stock Only</span>
           </label>
           
-          <button type="button" className="btn btn-secondary btn-sm" onClick={clearFilters}>
-            Clear Filters
-          </button>
+          {hasActiveFilters && (
+            <button type="button" className="btn btn-secondary btn-sm" onClick={clearFilters}>
+              Clear Filters
+            </button>
+          )}
         </div>
       </div>
 
@@ -197,98 +305,52 @@ function Books() {
         <div className="empty-state">
           <h3>No books found</h3>
           <p>Try adjusting your search or filters</p>
+          {hasActiveFilters && (
+            <button className="btn btn-primary mt-20" onClick={clearFilters}>
+              Clear All Filters
+            </button>
+          )}
         </div>
       ) : (
         <>
-          <div className="grid grid-4">
-            {books.map(book => (
-              <Link 
+          <div className="featured-books-grid">
+            {books.map((book, index) => (
+              <BookCard 
                 key={book.id} 
-                to={`/books/${book.id}`}
-                style={{ textDecoration: 'none', color: 'inherit' }}
-              >
-                <div className="book-card">
-                  {/* Book Image */}
-                  <div style={{ 
-                    height: '200px', 
-                    marginBottom: '10px',
-                    display: 'flex',
-                    alignItems: 'center',
-                    justifyContent: 'center',
-                    backgroundColor: '#f8f9fa',
-                    borderRadius: '4px',
-                    overflow: 'hidden'
-                  }}>
-                    {book.imageUrl ? (
-                      <img 
-                        src={book.imageUrl} 
-                        alt={book.title}
-                        style={{ 
-                          maxWidth: '100%', 
-                          maxHeight: '100%',
-                          objectFit: 'contain'
-                        }}
-                      />
-                    ) : (
-                      <span style={{ fontSize: '4rem', color: '#ccc' }}>📚</span>
-                    )}
-                  </div>
-                  
-                  <h3>{book.title}</h3>
-                  <p className="author">by {book.author}</p>
-                  <p className="price">${book.price.toFixed(2)}</p>
-                  <p className="category">
-                    {book.categories?.map(c => c.name).join(', ') || 'Uncategorized'}
-                  </p>
-                  <p style={{ fontSize: '0.85rem', marginBottom: '10px' }}>
-                    {book.quantity > 0 ? (
-                      <span className="text-success">In Stock ({book.quantity})</span>
-                    ) : (
-                      <span className="text-danger">Out of Stock</span>
-                    )}
-                  </p>
-                  {book.isRare && (
-                    <span className="badge badge-warning">Rare</span>
-                  )}
-                  <div className="mt-10">
-                    {isAuthenticated() && isCustomer() && book.quantity > 0 && (
-                      <button 
-                        className="btn btn-primary btn-sm"
-                        onClick={(e) => handleAddToCart(e, book.id)}
-                      >
-                        Add to Cart
-                      </button>
-                    )}
-                    <button 
-                      className="btn btn-secondary btn-sm"
-                      style={{ marginLeft: '5px' }}
-                      onClick={(e) => e.stopPropagation()}
-                    >
-                      View Details
-                    </button>
-                  </div>
-                </div>
-              </Link>
+                book={book} 
+                index={index}
+                onAddToCart={handleAddToCart}
+                isAuthenticated={isAuthenticated()}
+                isCustomer={isCustomer()}
+              />
             ))}
           </div>
 
           {/* Pagination */}
           {totalPages > 1 && (
-            <div className="flex flex-center gap-10 mt-20" style={{ justifyContent: 'center' }}>
+            <div className="flex flex-center gap-20 mt-40" style={{ justifyContent: 'center' }}>
               <button 
-                className="btn btn-secondary btn-sm"
+                className="btn btn-secondary"
                 onClick={() => setPage(p => Math.max(0, p - 1))}
                 disabled={page === 0}
               >
-                Previous
+                ← Previous
               </button>
-              <span>Page {page + 1} of {totalPages}</span>
+              <span style={{ 
+                padding: '10px 20px', 
+                background: 'white', 
+                borderRadius: '10px',
+                fontWeight: '600',
+                color: 'var(--gray-700)'
+              }}>
+                Page {page + 1} of {totalPages}
+              </span>
               <button 
-                className="btn btn-secondary btn-sm"
+                className="btn btn-secondary"
                 onClick={() => setPage(p => Math.min(totalPages - 1, p + 1))}
                 disabled={page >= totalPages - 1}
               >
-                Next
+                Next →
               </button>
             </div>
           )}
