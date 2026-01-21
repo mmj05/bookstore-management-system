@@ -1,4 +1,5 @@
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useCallback } from 'react';
+import { Link } from 'react-router-dom';
 import { booksAPI, categoriesAPI } from '../services/api';
 import { useAuth } from '../context/AuthContext';
 import { useCart } from '../context/CartContext';
@@ -24,11 +25,6 @@ function Books() {
   const { isAuthenticated, isCustomer } = useAuth();
   const { addToCart } = useCart();
 
-  useEffect(() => {
-    fetchCategories();
-    fetchBooks();
-  }, [page]);
-
   const fetchCategories = async () => {
     try {
       const response = await categoriesAPI.getAll();
@@ -38,7 +34,7 @@ function Books() {
     }
   };
 
-  const fetchBooks = async () => {
+  const fetchBooks = useCallback(async () => {
     setLoading(true);
     setError('');
     
@@ -46,12 +42,14 @@ function Books() {
       const params = {
         page,
         size: 12,
-        keyword: searchKeyword || null,
-        categoryId: selectedCategory || null,
-        minPrice: minPrice || null,
-        maxPrice: maxPrice || null,
-        inStock: inStockOnly || null,
       };
+      
+      // Only add non-empty filter params
+      if (searchKeyword) params.keyword = searchKeyword;
+      if (selectedCategory) params.categoryId = selectedCategory;
+      if (minPrice) params.minPrice = minPrice;
+      if (maxPrice) params.maxPrice = maxPrice;
+      if (inStockOnly) params.inStock = true;
       
       const response = await booksAPI.filter(params);
       setBooks(response.data.data.content);
@@ -62,15 +60,50 @@ function Books() {
     } finally {
       setLoading(false);
     }
-  };
+  }, [page, searchKeyword, selectedCategory, minPrice, maxPrice, inStockOnly]);
 
-  const handleSearch = (e) => {
-    e.preventDefault();
+  useEffect(() => {
+    fetchCategories();
+  }, []);
+
+  // Fetch books whenever any filter changes (with debounce for text inputs)
+  useEffect(() => {
+    const debounceTimer = setTimeout(() => {
+      fetchBooks();
+    }, 300); // 300ms debounce to avoid too many API calls while typing
+
+    return () => clearTimeout(debounceTimer);
+  }, [fetchBooks]);
+
+  // Reset to first page when filters change (except for pagination)
+  const handleCategoryChange = (value) => {
+    setSelectedCategory(value);
     setPage(0);
-    fetchBooks();
   };
 
-  const handleAddToCart = async (bookId) => {
+  const handleMinPriceChange = (value) => {
+    setMinPrice(value);
+    setPage(0);
+  };
+
+  const handleMaxPriceChange = (value) => {
+    setMaxPrice(value);
+    setPage(0);
+  };
+
+  const handleInStockChange = (checked) => {
+    setInStockOnly(checked);
+    setPage(0);
+  };
+
+  const handleSearchKeywordChange = (value) => {
+    setSearchKeyword(value);
+    setPage(0);
+  };
+
+  const handleAddToCart = async (e, bookId) => {
+    e.preventDefault();
+    e.stopPropagation();
     try {
       await addToCart(bookId, 1);
       setMessage('Book added to cart!');
@@ -87,7 +120,6 @@ function Books() {
     setMaxPrice('');
     setInStockOnly(false);
     setPage(0);
-    setTimeout(fetchBooks, 0);
   };
 
   return (
@@ -102,63 +134,60 @@ function Books() {
 
       {/* Search and Filter */}
       <div className="card mb-20">
-        <form onSubmit={handleSearch}>
-          <div className="search-bar">
-            <input
-              type="text"
-              className="form-control"
-              placeholder="Search by title, author, or ISBN..."
-              value={searchKeyword}
-              onChange={(e) => setSearchKeyword(e.target.value)}
-            />
-            <button type="submit" className="btn btn-primary">Search</button>
-          </div>
+        <div className="search-bar">
+          <input
+            type="text"
+            className="form-control"
+            placeholder="Search by title, author, or ISBN..."
+            value={searchKeyword}
+            onChange={(e) => handleSearchKeywordChange(e.target.value)}
+          />
+        </div>
+        
+        <div className="filter-group">
+          <select
+            className="form-control"
+            style={{ width: 'auto' }}
+            value={selectedCategory}
+            onChange={(e) => handleCategoryChange(e.target.value)}
+          >
+            <option value="">All Categories</option>
+            {categories.map(cat => (
+              <option key={cat.id} value={cat.id}>{cat.name}</option>
+            ))}
+          </select>
           
-          <div className="filter-group">
-            <select
-              className="form-control"
-              style={{ width: 'auto' }}
-              value={selectedCategory}
-              onChange={(e) => setSelectedCategory(e.target.value)}
-            >
-              <option value="">All Categories</option>
-              {categories.map(cat => (
-                <option key={cat.id} value={cat.id}>{cat.name}</option>
-              ))}
-            </select>
-            
+          <input
+            type="number"
+            className="form-control"
+            style={{ width: '120px' }}
+            placeholder="Min Price"
+            value={minPrice}
+            onChange={(e) => handleMinPriceChange(e.target.value)}
+          />
+          
+          <input
+            type="number"
+            className="form-control"
+            style={{ width: '120px' }}
+            placeholder="Max Price"
+            value={maxPrice}
+            onChange={(e) => handleMaxPriceChange(e.target.value)}
+          />
+          
+          <label style={{ display: 'flex', alignItems: 'center', gap: '5px' }}>
             <input
-              type="number"
-              className="form-control"
-              style={{ width: '120px' }}
-              placeholder="Min Price"
-              value={minPrice}
-              onChange={(e) => setMinPrice(e.target.value)}
+              type="checkbox"
+              checked={inStockOnly}
+              onChange={(e) => handleInStockChange(e.target.checked)}
             />
-            
-            <input
-              type="number"
-              className="form-control"
-              style={{ width: '120px' }}
-              placeholder="Max Price"
-              value={maxPrice}
-              onChange={(e) => setMaxPrice(e.target.value)}
-            />
-            
-            <label style={{ display: 'flex', alignItems: 'center', gap: '5px' }}>
-              <input
-                type="checkbox"
-                checked={inStockOnly}
-                onChange={(e) => setInStockOnly(e.target.checked)}
-              />
-              In Stock Only
-            </label>
-            
-            <button type="button" className="btn btn-secondary btn-sm" onClick={clearFilters}>
-              Clear Filters
-            </button>
-          </div>
-        </form>
+            In Stock Only
+          </label>
+          
+          <button type="button" className="btn btn-secondary btn-sm" onClick={clearFilters}>
+            Clear Filters
+          </button>
+        </div>
       </div>
 
       {/* Books Grid */}
@@ -173,34 +202,73 @@ function Books() {
         <>
           <div className="grid grid-4">
             {books.map(book => (
-              <div key={book.id} className="book-card">
-                <h3>{book.title}</h3>
-                <p className="author">by {book.author}</p>
-                <p className="price">${book.price.toFixed(2)}</p>
-                <p className="category">
-                  {book.categories?.map(c => c.name).join(', ') || 'Uncategorized'}
-                </p>
-                <p style={{ fontSize: '0.85rem', marginBottom: '10px' }}>
-                  {book.quantity > 0 ? (
-                    <span className="text-success">In Stock ({book.quantity})</span>
-                  ) : (
-                    <span className="text-danger">Out of Stock</span>
+              <Link 
+                key={book.id} 
+                to={`/books/${book.id}`}
+                style={{ textDecoration: 'none', color: 'inherit' }}
+              >
+                <div className="book-card">
+                  {/* Book Image */}
+                  <div style={{ 
+                    height: '200px', 
+                    marginBottom: '10px',
+                    display: 'flex',
+                    alignItems: 'center',
+                    justifyContent: 'center',
+                    backgroundColor: '#f8f9fa',
+                    borderRadius: '4px',
+                    overflow: 'hidden'
+                  }}>
+                    {book.imageUrl ? (
+                      <img 
+                        src={book.imageUrl} 
+                        alt={book.title}
+                        style={{ 
+                          maxWidth: '100%', 
+                          maxHeight: '100%',
+                          objectFit: 'contain'
+                        }}
+                      />
+                    ) : (
+                      <span style={{ fontSize: '4rem', color: '#ccc' }}>📚</span>
+                    )}
+                  </div>
+                  
+                  <h3>{book.title}</h3>
+                  <p className="author">by {book.author}</p>
+                  <p className="price">${book.price.toFixed(2)}</p>
+                  <p className="category">
+                    {book.categories?.map(c => c.name).join(', ') || 'Uncategorized'}
+                  </p>
+                  <p style={{ fontSize: '0.85rem', marginBottom: '10px' }}>
+                    {book.quantity > 0 ? (
+                      <span className="text-success">In Stock ({book.quantity})</span>
+                    ) : (
+                      <span className="text-danger">Out of Stock</span>
+                    )}
+                  </p>
+                  {book.isRare && (
+                    <span className="badge badge-warning">Rare</span>
                   )}
-                </p>
-                {book.isRare && (
-                  <span className="badge badge-warning">Rare</span>
-                )}
-                <div className="mt-10">
-                  {isAuthenticated() && isCustomer() && book.quantity > 0 && (
+                  <div className="mt-10">
+                    {isAuthenticated() && isCustomer() && book.quantity > 0 && (
+                      <button 
+                        className="btn btn-primary btn-sm"
+                        onClick={(e) => handleAddToCart(e, book.id)}
+                      >
+                        Add to Cart
+                      </button>
+                    )}
                     <button 
-                      className="btn btn-primary btn-sm"
-                      onClick={() => handleAddToCart(book.id)}
+                      className="btn btn-secondary btn-sm"
+                      style={{ marginLeft: '5px' }}
+                      onClick={(e) => e.stopPropagation()}
                     >
-                      Add to Cart
+                      View Details
                     </button>
-                  )}
+                  </div>
                 </div>
-              </div>
+              </Link>
             ))}
           </div>
 
