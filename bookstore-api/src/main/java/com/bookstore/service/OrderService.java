@@ -15,7 +15,9 @@ import org.springframework.data.domain.Sort;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
+import java.math.BigDecimal;
 import java.time.LocalDateTime;
+import java.util.ArrayList;
 import java.util.List;
 import java.util.UUID;
 import java.util.stream.Collectors;
@@ -28,7 +30,7 @@ public class OrderService {
     private final ShoppingCartRepository cartRepository;
     private final BookRepository bookRepository;
     private final UserRepository userRepository;
-    private final CartService cartService;
+    private final CartItemRepository cartItemRepository;
 
     public OrderResponse getOrderById(Long orderId, Long userId) {
         Order order = orderRepository.findByIdWithItems(orderId)
@@ -37,10 +39,10 @@ public class OrderService {
         // Check if user is authorized to view this order
         User user = userRepository.findById(userId)
                 .orElseThrow(() -> new ResourceNotFoundException("User not found"));
-        
-        if (!order.getUser().getId().equals(userId) && 
-            user.getRole() != Role.MANAGER && 
-            user.getRole() != Role.ADMINISTRATOR) {
+
+        if (!order.getUser().getId().equals(userId) &&
+                user.getRole() != Role.MANAGER &&
+                user.getRole() != Role.ADMINISTRATOR) {
             throw new ForbiddenException("You are not authorized to view this order");
         }
 
@@ -54,10 +56,10 @@ public class OrderService {
         // Check authorization
         User user = userRepository.findById(userId)
                 .orElseThrow(() -> new ResourceNotFoundException("User not found"));
-        
-        if (!order.getUser().getId().equals(userId) && 
-            user.getRole() != Role.MANAGER && 
-            user.getRole() != Role.ADMINISTRATOR) {
+
+        if (!order.getUser().getId().equals(userId) &&
+                user.getRole() != Role.MANAGER &&
+                user.getRole() != Role.ADMINISTRATOR) {
             throw new ForbiddenException("You are not authorized to view this order");
         }
 
@@ -78,11 +80,11 @@ public class OrderService {
     }
 
     public PageResponse<OrderResponse> getAllOrders(int page, int size, String sortBy, String sortDir) {
-        Sort sort = sortDir.equalsIgnoreCase("desc") 
-                ? Sort.by(sortBy).descending() 
+        Sort sort = sortDir.equalsIgnoreCase("desc")
+                ? Sort.by(sortBy).descending()
                 : Sort.by(sortBy).ascending();
         Pageable pageable = PageRequest.of(page, size, sort);
-        
+
         Page<OrderResponse> orderPage = orderRepository.findAll(pageable)
                 .map(OrderResponse::fromEntity);
         return PageResponse.fromPage(orderPage);
@@ -97,7 +99,7 @@ public class OrderService {
 
     @Transactional
     public OrderResponse checkout(Long userId, CheckoutRequest request) {
-        // Get user's cart
+        // Get user's cart with items and books
         ShoppingCart cart = cartRepository.findByUserIdWithItemsAndBooks(userId)
                 .orElseThrow(() -> new ResourceNotFoundException("Cart not found for user"));
 
@@ -105,20 +107,38 @@ public class OrderService {
             throw new BadRequestException("Cannot checkout with an empty cart");
         }
 
-        // Validate stock availability for all items
+        // Copy cart items data before any modifications to avoid entity state issues
+        List<CartItemData> cartItemsData = new ArrayList<>();
         for (CartItem cartItem : cart.getItems()) {
             Book book = cartItem.getBook();
+
+            // Validate stock availability
             if (book.getQuantity() < cartItem.getQuantity()) {
                 throw new InsufficientStockException(
-                        "Insufficient stock for book: " + book.getTitle() + 
-                        ". Available: " + book.getQuantity() + ", Requested: " + cartItem.getQuantity());
+                        "Insufficient stock for book: " + book.getTitle() +
+                                ". Available: " + book.getQuantity() + ", Requested: " + cartItem.getQuantity());
             }
+
+            // Store the data we need
+            cartItemsData.add(new CartItemData(
+                    book.getId(),
+                    book.getTitle(),
+                    book.getAuthor(),
+                    book.getIsbn(),
+                    book.getPrice(),
+                    cartItem.getQuantity(),
+                    book.getQuantity() // current stock
+            ));
         }
 
-        // Create order
+        // Store cart ID for later cleanup
+        Long cartId = cart.getId();
+
+        // Get user
         User user = userRepository.findById(userId)
                 .orElseThrow(() -> new ResourceNotFoundException("User not found"));
 
+        // Create order
         Order order = Order.builder()
                 .orderNumber(generateOrderNumber())
                 .user(user)
@@ -126,35 +146,47 @@ public class OrderService {
                 .shippingAddress(request.getShippingAddress())
                 .paymentMethod("CASH_ON_DELIVERY")
                 .notes(request.getNotes())
+                .subtotal(BigDecimal.ZERO)
+                .tax(BigDecimal.ZERO)
+                .shippingCost(BigDecimal.ZERO)
+                .total(BigDecimal.ZERO)
                 .build();
 
-        // Create order items and update inventory
-        for (CartItem cartItem : cart.getItems()) {
-            Book book = cartItem.getBook();
-            
+        // Create order items and update inventory using the copied data
+        for (CartItemData itemData : cartItemsData) {
+            Book book = bookRepository.findById(itemData.bookId)
+                    .orElseThrow(() -> new ResourceNotFoundException("Book not found"));
+
             OrderItem orderItem = OrderItem.builder()
                     .book(book)
-                    .quantity(cartItem.getQuantity())
-                    .priceAtPurchase(book.getPrice())
+                    .quantity(itemData.quantity)
+                    .priceAtPurchase(itemData.price)
                     .build();
-            
+
             order.addItem(orderItem);
 
             // Reduce book quantity
-            book.setQuantity(book.getQuantity() - cartItem.getQuantity());
+            book.setQuantity(book.getQuantity() - itemData.quantity);
             bookRepository.save(book);
         }
 
         // Calculate totals
         order.calculateTotals();
 
-        // Save order
+        // Save order first
         order = orderRepository.save(order);
 
-        // Clear the cart
-        cartService.clearCart(userId);
+        // Store order ID
+        Long orderId = order.getId();
 
-        return OrderResponse.fromEntity(order);
+        // Clear the cart using direct delete query only (don't touch the managed cart entity)
+        cartItemRepository.deleteAllByCartId(cartId);
+
+        // Fetch the saved order with items for response
+        Order savedOrder = orderRepository.findByIdWithItems(orderId)
+                .orElseThrow(() -> new ResourceNotFoundException("Order not found after save"));
+
+        return OrderResponse.fromEntity(savedOrder);
     }
 
     @Transactional
@@ -203,10 +235,10 @@ public class OrderService {
         // Check authorization
         User user = userRepository.findById(userId)
                 .orElseThrow(() -> new ResourceNotFoundException("User not found"));
-        
-        if (!order.getUser().getId().equals(userId) && 
-            user.getRole() != Role.MANAGER && 
-            user.getRole() != Role.ADMINISTRATOR) {
+
+        if (!order.getUser().getId().equals(userId) &&
+                user.getRole() != Role.MANAGER &&
+                user.getRole() != Role.ADMINISTRATOR) {
             throw new ForbiddenException("You are not authorized to cancel this order");
         }
 
@@ -243,6 +275,28 @@ public class OrderService {
 
         if (!valid) {
             throw new BadRequestException("Invalid status transition from " + from + " to " + to);
+        }
+    }
+
+    // Inner class to hold cart item data temporarily
+    private static class CartItemData {
+        final Long bookId;
+        final String title;
+        final String author;
+        final String isbn;
+        final BigDecimal price;
+        final int quantity;
+        final int currentStock;
+
+        CartItemData(Long bookId, String title, String author, String isbn,
+                     BigDecimal price, int quantity, int currentStock) {
+            this.bookId = bookId;
+            this.title = title;
+            this.author = author;
+            this.isbn = isbn;
+            this.price = price;
+            this.quantity = quantity;
+            this.currentStock = currentStock;
         }
     }
 }
