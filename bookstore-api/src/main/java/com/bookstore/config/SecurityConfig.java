@@ -68,7 +68,10 @@ public class SecurityConfig {
                 .requestMatchers("/api/inventory/**").hasAnyRole("MANAGER", "ADMINISTRATOR")
                 .requestMatchers("/api/reports/**").hasAnyRole("MANAGER", "ADMINISTRATOR")
                 
-                // Admin endpoints
+                // User profile endpoints (accessible to all authenticated users)
+                .requestMatchers("/api/users/me/**").authenticated()
+                
+                // Admin endpoints (user management - except /me)
                 .requestMatchers("/api/users/**").hasRole("ADMINISTRATOR")
                 .requestMatchers("/api/admin/**").hasRole("ADMINISTRATOR")
                 
