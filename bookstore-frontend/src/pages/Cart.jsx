@@ -5,7 +5,7 @@ import { ordersAPI } from '../services/api';
 import { useAuth } from '../context/AuthContext';
 
 function Cart() {
-  const { cart, loading, updateQuantity, removeFromCart } = useCart();
+  const { cart, loading, updateQuantity, removeFromCart, resetCart } = useCart();
   const { user } = useAuth();
   const navigate = useNavigate();
   
@@ -42,10 +42,17 @@ function Cart() {
     setCheckoutError('');
 
     try {
+      // Note: Payment method is ALWAYS Cash on Delivery - no other options available
       const response = await ordersAPI.checkout({
         shippingAddress,
         notes,
+        paymentMethod: 'CASH_ON_DELIVERY', // Fixed payment method - cannot be changed
       });
+      
+      // Reset the cart state on the frontend after successful checkout
+      // (backend already clears the cart, this just updates the local state)
+      resetCart();
+      
       navigate('/orders', { 
         state: { message: 'Order placed successfully! Payment will be collected on delivery.' }
       });
@@ -176,6 +183,7 @@ function Cart() {
                   value={shippingAddress}
                   onChange={(e) => setShippingAddress(e.target.value)}
                   rows="3"
+                  placeholder="Enter your full shipping address"
                   required
                 />
               </div>
@@ -187,13 +195,33 @@ function Cart() {
                   value={notes}
                   onChange={(e) => setNotes(e.target.value)}
                   rows="2"
+                  placeholder="Any special instructions for your order"
                 />
               </div>
 
-              <div className="alert alert-info">
-                <strong>Payment Method:</strong> Cash on Delivery (COD)
-                <br />
-                <small>Payment will be collected when your order is delivered.</small>
+              {/* Payment Method - Cash on Delivery ONLY */}
+              <div className="alert alert-info" style={{ marginBottom: '15px' }}>
+                <div style={{ display: 'flex', alignItems: 'center', gap: '10px' }}>
+                  <span style={{ fontSize: '1.5rem' }}>💵</span>
+                  <div>
+                    <strong>Payment Method: Cash on Delivery (COD)</strong>
+                    <br />
+                    <small>Payment will be collected when your order is delivered.</small>
+                  </div>
+                </div>
+              </div>
+              
+              <div style={{ 
+                padding: '10px', 
+                backgroundColor: '#f0f9ff', 
+                borderRadius: '4px', 
+                marginBottom: '15px',
+                border: '1px solid #bae6fd'
+              }}>
+                <p style={{ margin: 0, fontSize: '0.85rem', color: '#0369a1' }}>
+                  <strong>Note:</strong> Cash on Delivery is the only payment method available. 
+                  Please have the exact amount ready at the time of delivery.
+                </p>
               </div>
 
               {checkoutError && (
@@ -206,7 +234,7 @@ function Cart() {
                 style={{ width: '100%' }}
                 disabled={checkoutLoading}
               >
-                {checkoutLoading ? 'Processing...' : 'Place Order'}
+                {checkoutLoading ? 'Processing...' : 'Place Order (Pay on Delivery)'}
               </button>
             </form>
           </div>
