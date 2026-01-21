@@ -12,7 +12,7 @@ function BookCard({ book, index }) {
       <div className={`book-card ${colorClass}`}>
         <div className="book-card-inner">
           <div className="book-spine">
-            <span className="book-spine-title">{book.title}</span>
+            <span className="book-spine-title">{book.title.split(' ')[0]}</span>
           </div>
           <div className="book-cover">
             <div className="book-pages"></div>
@@ -26,7 +26,7 @@ function BookCard({ book, index }) {
                 {book.categories?.map(c => c.name).join(', ') || 'Uncategorized'}
               </div>
               <span className={`book-stock ${book.quantity > 0 ? 'in-stock' : 'out-of-stock'}`}>
-                {book.quantity > 0 ? `In Stock (${book.quantity})` : 'Out of Stock'}
+                {book.quantity > 0 ? 'In Stock' : 'Out of Stock'}
               </span>
             </div>
           </div>
@@ -63,11 +63,16 @@ function Home() {
 
   return (
     <div>
-      {/* Hero Section */}
+      {/* Hero Section - Cinematic Style */}
       <section className="hero">
         <div className="hero-content">
+          <div className="hero-badge">
+            ✦ Est. 2026 — Purveyors of Fine Literature
+          </div>
           <h1 className="hero-title">
-            Discover <span>Rare</span> & Timeless Books
+            <span>Discover</span>
+            <span className="gold-text">Extraordinary</span>
+            <span>Books</span>
           </h1>
           <p className="hero-subtitle">
             Welcome to Blackwood Rare Books — your gateway to extraordinary literary treasures. 
@@ -76,6 +81,10 @@ function Home() {
           <div className="hero-buttons">
             <Link to="/books" className="btn btn-primary btn-lg">
               Browse Collection
+              <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round">
+                <line x1="5" y1="12" x2="19" y2="12"></line>
+                <polyline points="12 5 19 12 12 19"></polyline>
+              </svg>
             </Link>
             {!isAuthenticated() && (
               <Link to="/register" className="btn btn-outline btn-lg">
@@ -87,10 +96,10 @@ function Home() {
           <div className="hero-stats">
             <div className="hero-stat">
               <span className="hero-stat-number">{bookStats.total}+</span>
-              <span className="hero-stat-label">Books Available</span>
+              <span className="hero-stat-label">Rare Books</span>
             </div>
             <div className="hero-stat">
-              <span className="hero-stat-number">{bookStats.categories}+</span>
+              <span className="hero-stat-number">6+</span>
               <span className="hero-stat-label">Categories</span>
             </div>
             <div className="hero-stat">
@@ -116,8 +125,14 @@ function Home() {
         {/* Featured Books Section */}
         <section className="featured-books">
           <div className="section-header">
-            <h2 className="section-title">Featured Books</h2>
-            <Link to="/books" className="btn btn-secondary">View All Books</Link>
+            <h2 className="section-title">Featured Collection</h2>
+            <Link to="/books" className="btn btn-outline">
+              View All
+              <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+                <line x1="5" y1="12" x2="19" y2="12"></line>
+                <polyline points="12 5 19 12 12 19"></polyline>
+              </svg>
+            </Link>
           </div>
           
           {loading ? (
@@ -138,28 +153,30 @@ function Home() {
 
         {/* Quick Actions Section */}
         <section className="mt-40">
-          <h2 className="section-title mb-20">Quick Actions</h2>
+          <div className="section-header">
+            <h2 className="section-title">Why Choose Blackwood</h2>
+          </div>
           <div className="grid grid-3">
             <div className="feature-card">
-              <span className="feature-card-icon">📖</span>
-              <h3>Browse Books</h3>
-              <p>Explore our collection of books across various categories and genres.</p>
+              <div className="feature-card-icon">📖</div>
+              <h3>Curated Collection</h3>
+              <p>Every book is hand-selected by our expert curators for authenticity and condition.</p>
               <Link to="/books" className="btn btn-primary">Browse Now</Link>
             </div>
 
             {!isAuthenticated() && (
               <>
                 <div className="feature-card">
-                  <span className="feature-card-icon">🔐</span>
-                  <h3>Sign In</h3>
-                  <p>Already have an account? Sign in to access your cart and orders.</p>
+                  <div className="feature-card-icon">🔐</div>
+                  <h3>Secure Account</h3>
+                  <p>Already have an account? Sign in to access your cart and track orders.</p>
                   <Link to="/login" className="btn btn-primary">Sign In</Link>
                 </div>
 
                 <div className="feature-card">
-                  <span className="feature-card-icon">📝</span>
-                  <h3>Create Account</h3>
-                  <p>New here? Create an account to start building your library.</p>
+                  <div className="feature-card-icon">✨</div>
+                  <h3>Join Us</h3>
+                  <p>Create an account to start building your personal library collection.</p>
                   <Link to="/register" className="btn btn-primary">Register</Link>
                 </div>
               </>
@@ -168,16 +185,16 @@ function Home() {
             {isAuthenticated() && user.role === 'CUSTOMER' && (
               <>
                 <div className="feature-card">
-                  <span className="feature-card-icon">🛒</span>
+                  <div className="feature-card-icon">🛒</div>
                   <h3>Shopping Cart</h3>
-                  <p>View items in your cart and proceed to checkout.</p>
+                  <p>View items in your cart and proceed to secure checkout.</p>
                   <Link to="/cart" className="btn btn-primary">View Cart</Link>
                 </div>
 
                 <div className="feature-card">
-                  <span className="feature-card-icon">📦</span>
+                  <div className="feature-card-icon">📦</div>
                   <h3>My Orders</h3>
-                  <p>Track your order status and view your order history.</p>
+                  <p>Track your order status and view complete order history.</p>
                   <Link to="/orders" className="btn btn-primary">View Orders</Link>
                 </div>
               </>
@@ -186,16 +203,16 @@ function Home() {
             {isAuthenticated() && (user.role === 'MANAGER' || user.role === 'ADMINISTRATOR') && (
               <>
                 <div className="feature-card">
-                  <span className="feature-card-icon">📦</span>
+                  <div className="feature-card-icon">📦</div>
                   <h3>Inventory</h3>
-                  <p>Manage book inventory, add new books, and update stock levels.</p>
+                  <p>Manage book inventory, add new titles, and update stock levels.</p>
                   <Link to="/inventory" className="btn btn-primary">Manage Inventory</Link>
                 </div>
 
                 <div className="feature-card">
-                  <span className="feature-card-icon">📊</span>
+                  <div className="feature-card-icon">📊</div>
                   <h3>Reports</h3>
-                  <p>View detailed inventory and sales analytics reports.</p>
+                  <p>View detailed inventory analytics and sales reports.</p>
                   <Link to="/reports" className="btn btn-primary">View Reports</Link>
                 </div>
               </>
@@ -203,7 +220,7 @@ function Home() {
 
             {isAuthenticated() && user.role === 'ADMINISTRATOR' && (
               <div className="feature-card">
-                <span className="feature-card-icon">👥</span>
+                <div className="feature-card-icon">👥</div>
                 <h3>User Management</h3>
                 <p>Manage user accounts, roles, and access permissions.</p>
                 <Link to="/users" className="btn btn-primary">Manage Users</Link>
@@ -217,7 +234,7 @@ function Home() {
           <h3>About Blackwood Rare Books</h3>
           <p>
             Blackwood Rare Books is your premier destination for rare, collectible, and hard-to-find books.
-            We specialize in curating exceptional literary treasures from around the world.
+            Since 1892, we have been curating exceptional literary treasures from around the world.
             Whether you're a collector seeking a first edition or a reader looking for timeless classics,
             our carefully curated collection has something special for you.
           </p>
