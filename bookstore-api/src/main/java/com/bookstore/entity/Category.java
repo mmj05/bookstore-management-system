@@ -1,5 +1,6 @@
 package com.bookstore.entity;
 
+import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import jakarta.persistence.*;
 import lombok.*;
 
@@ -14,6 +15,7 @@ import java.util.Set;
 @NoArgsConstructor
 @AllArgsConstructor
 @EqualsAndHashCode(exclude = "books")
+@ToString(exclude = "books")
 public class Category {
 
     @Id
@@ -28,6 +30,7 @@ public class Category {
 
     @ManyToMany(mappedBy = "categories", fetch = FetchType.LAZY)
     @Builder.Default
+    @JsonIgnoreProperties("categories")
     private Set<Book> books = new HashSet<>();
 
     @Column(nullable = false, updatable = false)
