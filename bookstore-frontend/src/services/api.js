@@ -18,6 +18,14 @@ const api = axios.create({
   },
 });
 
+// Store the logout handler from AuthContext
+let authLogoutHandler = null;
+
+// Function to set the logout handler (called from AuthContext)
+export const setAuthLogoutHandler = (handler) => {
+  authLogoutHandler = handler;
+};
+
 // Add auth token to requests
 api.interceptors.request.use((config) => {
   const token = localStorage.getItem('accessToken');
@@ -31,12 +39,26 @@ api.interceptors.request.use((config) => {
 api.interceptors.response.use(
   (response) => response,
   async (error) => {
-    if (error.response?.status === 401) {
-      localStorage.removeItem('accessToken');
-      localStorage.removeItem('refreshToken');
-      localStorage.removeItem('user');
+    const originalRequest = error.config;
+    
+    // Handle 401 Unauthorized errors (token expired or invalid)
+    if (error.response?.status === 401 && !originalRequest._retry) {
+      originalRequest._retry = true;
+      
+      // Use the auth logout handler if available
+      if (authLogoutHandler) {
+        authLogoutHandler();
+      } else {
+        // Fallback: clear storage directly
+        localStorage.removeItem('accessToken');
+        localStorage.removeItem('refreshToken');
+        localStorage.removeItem('user');
+      }
+      
+      // Redirect to login page
       window.location.href = '/login';
     }
+    
     return Promise.reject(error);
   }
 );
