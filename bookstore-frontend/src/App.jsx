@@ -5,6 +5,7 @@ import Home from './pages/Home';
 import Login from './pages/Login';
 import Register from './pages/Register';
 import Books from './pages/Books';
+import BookDetail from './pages/BookDetail';
 import Cart from './pages/Cart';
 import Orders from './pages/Orders';
 import Inventory from './pages/Inventory';
@@ -39,6 +40,7 @@ function App() {
           <Route path="/login" element={<Login />} />
           <Route path="/register" element={<Register />} />
           <Route path="/books" element={<Books />} />
+          <Route path="/books/:id" element={<BookDetail />} />
           
           {/* Customer routes */}
           <Route 
