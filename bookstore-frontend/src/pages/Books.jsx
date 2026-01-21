@@ -19,7 +19,7 @@ function BookCard({ book, index, onAddToCart, isAuthenticated, isCustomer }) {
       <div className={`book-card ${colorClass}`}>
         <div className="book-card-inner">
           <div className="book-spine">
-            <span className="book-spine-title">{book.title}</span>
+            <span className="book-spine-title">{book.title.split(' ')[0]}</span>
           </div>
           <div className="book-cover">
             <div className="book-pages"></div>
@@ -33,7 +33,7 @@ function BookCard({ book, index, onAddToCart, isAuthenticated, isCustomer }) {
                 {book.categories?.map(c => c.name).join(', ') || 'Uncategorized'}
               </div>
               <span className={`book-stock ${book.quantity > 0 ? 'in-stock' : 'out-of-stock'}`}>
-                {book.quantity > 0 ? `In Stock (${book.quantity})` : 'Out of Stock'}
+                {book.quantity > 0 ? 'In Stock' : 'Out of Stock'}
               </span>
               {isAuthenticated && isCustomer && book.quantity > 0 && (
                 <div className="book-actions">
@@ -189,7 +189,7 @@ function Books() {
   const hasActiveFilters = searchKeyword || isbnSearch || selectedCategory || minPrice || maxPrice || inStockOnly;
 
   return (
-    <div className="container" style={{ paddingTop: '30px', paddingBottom: '60px' }}>
+    <div className="container" style={{ paddingTop: '90px', paddingBottom: '60px' }}>
       <div className="page-header">
         <h1>Browse Books</h1>
         <p className="text-muted">
@@ -337,11 +337,12 @@ function Books() {
                 ← Previous
               </button>
               <span style={{ 
-                padding: '10px 20px', 
-                background: 'white', 
-                borderRadius: '10px',
+                padding: '12px 24px', 
+                background: 'var(--bg-elevated)', 
+                borderRadius: '12px',
                 fontWeight: '600',
-                color: 'var(--gray-700)'
+                color: 'var(--text-primary)',
+                border: '1px solid var(--border-subtle)'
               }}>
                 Page {page + 1} of {totalPages}
               </span>
