@@ -1,5 +1,6 @@
 package com.bookstore.entity;
 
+import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import jakarta.persistence.*;
 import lombok.*;
 
@@ -15,6 +16,7 @@ import java.util.Set;
 @NoArgsConstructor
 @AllArgsConstructor
 @EqualsAndHashCode(exclude = "categories")
+@ToString(exclude = "categories")
 public class Book {
 
     @Id
@@ -52,11 +54,12 @@ public class Book {
 
     @ManyToMany(fetch = FetchType.LAZY)
     @JoinTable(
-        name = "book_categories",
-        joinColumns = @JoinColumn(name = "book_id"),
-        inverseJoinColumns = @JoinColumn(name = "category_id")
+            name = "book_categories",
+            joinColumns = @JoinColumn(name = "book_id"),
+            inverseJoinColumns = @JoinColumn(name = "category_id")
     )
     @Builder.Default
+    @JsonIgnoreProperties("books")
     private Set<Category> categories = new HashSet<>();
 
     @Column(nullable = false, updatable = false)
