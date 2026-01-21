@@ -1,5 +1,7 @@
 package com.bookstore.entity;
 
+import com.fasterxml.jackson.annotation.JsonBackReference;
+import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import jakarta.persistence.*;
 import lombok.*;
 
@@ -11,6 +13,8 @@ import java.time.LocalDateTime;
 @Builder
 @NoArgsConstructor
 @AllArgsConstructor
+@ToString(exclude = {"cart", "book"})
+@EqualsAndHashCode(exclude = {"cart", "book"})
 public class CartItem {
 
     @Id
@@ -19,10 +23,12 @@ public class CartItem {
 
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "cart_id", nullable = false)
+    @JsonBackReference
     private ShoppingCart cart;
 
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "book_id", nullable = false)
+    @JsonIgnoreProperties({"categories", "description"})
     private Book book;
 
     @Column(nullable = false)
