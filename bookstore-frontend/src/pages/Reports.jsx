@@ -51,7 +51,7 @@ function Reports() {
 
       {/* Tab Navigation */}
       <div className="card mb-20">
-        <div className="flex gap-10">
+        <div className="reports-tabs">
           <button 
             className={`btn ${activeTab === 'inventory' ? 'btn-primary' : 'btn-secondary'}`}
             onClick={() => setActiveTab('inventory')}
@@ -77,35 +77,35 @@ function Reports() {
       {activeTab === 'inventory' && inventoryReport && (
         <div>
           {/* Summary Cards */}
-          <div className="grid grid-4">
-            <div className="card text-center">
-              <h4 className="text-muted">Total Books</h4>
-              <p style={{ fontSize: '2rem', fontWeight: 'bold', color: '#1e3a5f' }}>
+          <div className="grid grid-2">
+            <div className="card report-stat-card">
+              <h4>Total Books</h4>
+              <p className="report-stat-value" style={{ color: '#1e3a5f' }}>
                 {inventoryReport.totalBooks}
               </p>
             </div>
-            <div className="card text-center">
-              <h4 className="text-muted">Inventory Value</h4>
-              <p style={{ fontSize: '2rem', fontWeight: 'bold', color: '#16a34a' }}>
+            <div className="card report-stat-card">
+              <h4>Inventory Value</h4>
+              <p className="report-stat-value" style={{ color: '#16a34a' }}>
                 ${parseFloat(inventoryReport.totalInventoryValue).toLocaleString('en-US', {
                   minimumFractionDigits: 2,
                   maximumFractionDigits: 2
                 })}
               </p>
             </div>
-            <div className="card text-center">
-              <h4 className="text-muted">Low Stock</h4>
-              <p style={{ fontSize: '2rem', fontWeight: 'bold', color: '#f59e0b' }}>
+            <div className="card report-stat-card">
+              <h4>Low Stock</h4>
+              <p className="report-stat-value" style={{ color: '#f59e0b' }}>
                 {inventoryReport.lowStockBooks}
               </p>
-              <small className="text-muted">Less than 5 units</small>
+              <small className="report-stat-small">Less than 5 units</small>
             </div>
-            <div className="card text-center">
-              <h4 className="text-muted">Out of Stock</h4>
-              <p style={{ fontSize: '2rem', fontWeight: 'bold', color: '#dc2626' }}>
+            <div className="card report-stat-card">
+              <h4>Out of Stock</h4>
+              <p className="report-stat-value" style={{ color: '#dc2626' }}>
                 {inventoryReport.outOfStockBooks}
               </p>
-              <small className="text-muted">0 units available</small>
+              <small className="report-stat-small">0 units available</small>
             </div>
           </div>
 
@@ -113,55 +113,81 @@ function Reports() {
           <div className="card mt-20">
             <h3 className="card-title">Books by Category</h3>
             <p className="text-muted mb-20">Inventory breakdown showing quantities per category</p>
-            <table className="table">
-              <thead>
-                <tr>
-                  <th>Category</th>
-                  <th>Number of Books</th>
-                  <th>Percentage of Total</th>
-                </tr>
-              </thead>
-              <tbody>
-                {inventoryReport.booksByCategory && 
-                  Object.entries(inventoryReport.booksByCategory).map(([category, count]) => (
-                    <tr key={category}>
-                      <td>{category}</td>
-                      <td>{count}</td>
-                      <td>
-                        {inventoryReport.totalBooks > 0 
-                          ? ((count / inventoryReport.totalBooks) * 100).toFixed(1) + '%'
-                          : '0%'
-                        }
-                      </td>
+            
+            {/* Mobile view */}
+            <div className="reports-mobile-table">
+              {inventoryReport.booksByCategory && 
+                Object.entries(inventoryReport.booksByCategory).map(([category, count]) => (
+                  <div key={category} className="report-list-item">
+                    <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+                      <strong>{category}</strong>
+                      <span>{count} books</span>
+                    </div>
+                    <div style={{ fontSize: '0.85rem', color: 'var(--gray-500)', marginTop: '4px' }}>
+                      {inventoryReport.totalBooks > 0 
+                        ? ((count / inventoryReport.totalBooks) * 100).toFixed(1) + '% of total'
+                        : '0%'
+                      }
+                    </div>
+                  </div>
+                ))
+              }
+            </div>
+            
+            {/* Desktop view */}
+            <div className="reports-desktop-table">
+              <div className="table-responsive">
+                <table className="table">
+                  <thead>
+                    <tr>
+                      <th>Category</th>
+                      <th>Number of Books</th>
+                      <th>Percentage of Total</th>
                     </tr>
-                  ))
-                }
-              </tbody>
-            </table>
+                  </thead>
+                  <tbody>
+                    {inventoryReport.booksByCategory && 
+                      Object.entries(inventoryReport.booksByCategory).map(([category, count]) => (
+                        <tr key={category}>
+                          <td>{category}</td>
+                          <td>{count}</td>
+                          <td>
+                            {inventoryReport.totalBooks > 0 
+                              ? ((count / inventoryReport.totalBooks) * 100).toFixed(1) + '%'
+                              : '0%'
+                            }
+                          </td>
+                        </tr>
+                      ))
+                    }
+                  </tbody>
+                </table>
+              </div>
+            </div>
           </div>
 
           {/* Inventory Valuation Summary */}
           <div className="card mt-20">
             <h3 className="card-title">Inventory Valuation Summary</h3>
             <div className="grid grid-3">
-              <div style={{ padding: '20px', backgroundColor: '#f8f9fa', borderRadius: '8px' }}>
+              <div className="report-summary-box">
                 <h4 className="text-muted">Total Inventory Value</h4>
-                <p style={{ fontSize: '1.5rem', fontWeight: 'bold', color: '#16a34a' }}>
+                <p style={{ fontSize: '1.5rem', fontWeight: 'bold', color: '#16a34a', margin: 0 }}>
                   ${parseFloat(inventoryReport.totalInventoryValue || 0).toLocaleString('en-US', {
                     minimumFractionDigits: 2,
                     maximumFractionDigits: 2
                   })}
                 </p>
               </div>
-              <div style={{ padding: '20px', backgroundColor: '#f8f9fa', borderRadius: '8px' }}>
+              <div className="report-summary-box">
                 <h4 className="text-muted">Total Book Count</h4>
-                <p style={{ fontSize: '1.5rem', fontWeight: 'bold', color: '#1e3a5f' }}>
+                <p style={{ fontSize: '1.5rem', fontWeight: 'bold', color: '#1e3a5f', margin: 0 }}>
                   {inventoryReport.totalBooks} titles
                 </p>
               </div>
-              <div style={{ padding: '20px', backgroundColor: '#f8f9fa', borderRadius: '8px' }}>
+              <div className="report-summary-box">
                 <h4 className="text-muted">Avg. Value per Title</h4>
-                <p style={{ fontSize: '1.5rem', fontWeight: 'bold', color: '#3b82f6' }}>
+                <p style={{ fontSize: '1.5rem', fontWeight: 'bold', color: '#3b82f6', margin: 0 }}>
                   ${inventoryReport.totalBooks > 0 
                     ? (parseFloat(inventoryReport.totalInventoryValue) / inventoryReport.totalBooks).toFixed(2)
                     : '0.00'
@@ -177,24 +203,24 @@ function Reports() {
       {activeTab === 'sales' && salesReport && (
         <div>
           <div className="grid grid-3">
-            <div className="card text-center">
-              <h4 className="text-muted">Total Revenue</h4>
-              <p style={{ fontSize: '2rem', fontWeight: 'bold', color: '#16a34a' }}>
+            <div className="card report-stat-card">
+              <h4>Total Revenue</h4>
+              <p className="report-stat-value" style={{ color: '#16a34a' }}>
                 ${parseFloat(salesReport.totalRevenue || 0).toLocaleString('en-US', {
                   minimumFractionDigits: 2,
                   maximumFractionDigits: 2
                 })}
               </p>
             </div>
-            <div className="card text-center">
-              <h4 className="text-muted">Total Orders</h4>
-              <p style={{ fontSize: '2rem', fontWeight: 'bold', color: '#1e3a5f' }}>
+            <div className="card report-stat-card">
+              <h4>Total Orders</h4>
+              <p className="report-stat-value" style={{ color: '#1e3a5f' }}>
                 {salesReport.totalOrders}
               </p>
             </div>
-            <div className="card text-center">
-              <h4 className="text-muted">Completed Orders</h4>
-              <p style={{ fontSize: '2rem', fontWeight: 'bold', color: '#16a34a' }}>
+            <div className="card report-stat-card">
+              <h4>Completed Orders</h4>
+              <p className="report-stat-value" style={{ color: '#16a34a' }}>
                 {salesReport.ordersByStatus?.DELIVERED || 0}
               </p>
             </div>
@@ -203,66 +229,117 @@ function Reports() {
           <div className="grid grid-2 mt-20">
             <div className="card">
               <h3 className="card-title">Orders by Status</h3>
-              <table className="table">
-                <thead>
-                  <tr>
-                    <th>Status</th>
-                    <th>Count</th>
-                  </tr>
-                </thead>
-                <tbody>
-                  {salesReport.ordersByStatus && 
-                    Object.entries(salesReport.ordersByStatus).map(([status, count]) => (
-                      <tr key={status}>
-                        <td>
-                          <span className={`badge badge-${getStatusBadgeColor(status)}`}>
-                            {status}
-                          </span>
-                        </td>
-                        <td>{count}</td>
-                      </tr>
-                    ))
-                  }
-                </tbody>
-              </table>
+              
+              {/* Mobile view */}
+              <div className="reports-mobile-table">
+                {salesReport.ordersByStatus && 
+                  Object.entries(salesReport.ordersByStatus).map(([status, count]) => (
+                    <div key={status} className="report-list-item">
+                      <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+                        <span className={`badge badge-${getStatusBadgeColor(status)}`}>{status}</span>
+                        <strong>{count}</strong>
+                      </div>
+                    </div>
+                  ))
+                }
+              </div>
+              
+              {/* Desktop view */}
+              <div className="reports-desktop-table">
+                <table className="table">
+                  <thead>
+                    <tr>
+                      <th>Status</th>
+                      <th>Count</th>
+                    </tr>
+                  </thead>
+                  <tbody>
+                    {salesReport.ordersByStatus && 
+                      Object.entries(salesReport.ordersByStatus).map(([status, count]) => (
+                        <tr key={status}>
+                          <td>
+                            <span className={`badge badge-${getStatusBadgeColor(status)}`}>
+                              {status}
+                            </span>
+                          </td>
+                          <td>{count}</td>
+                        </tr>
+                      ))
+                    }
+                  </tbody>
+                </table>
+              </div>
             </div>
 
             <div className="card">
               <h3 className="card-title">Best Selling Books</h3>
               {salesReport.bestSellingBooks && salesReport.bestSellingBooks.length > 0 ? (
-                <table className="table">
-                  <thead>
-                    <tr>
-                      <th>Rank</th>
-                      <th>Book</th>
-                      <th>Units Sold</th>
-                    </tr>
-                  </thead>
-                  <tbody>
+                <>
+                  {/* Mobile view */}
+                  <div className="reports-mobile-table">
                     {salesReport.bestSellingBooks.map((book, index) => (
-                      <tr key={index}>
-                        <td>
-                          <span style={{ 
-                            display: 'inline-block',
-                            width: '24px',
-                            height: '24px',
-                            borderRadius: '50%',
-                            backgroundColor: index < 3 ? '#f59e0b' : '#e5e7eb',
-                            color: index < 3 ? 'white' : '#666',
-                            textAlign: 'center',
-                            lineHeight: '24px',
-                            fontWeight: 'bold',
-                            fontSize: '0.8rem'
-                          }}>
-                            {index + 1}
-                          </span>
-                        </td>
-                        <td>{book.title}</td>
-                        <td>{book.totalSold}</td>
-                      </tr>
+                      <div key={index} className="report-list-item">
+                        <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+                          <div style={{ display: 'flex', alignItems: 'center', gap: '10px' }}>
+                            <span style={{ 
+                              display: 'inline-flex',
+                              alignItems: 'center',
+                              justifyContent: 'center',
+                              width: '24px',
+                              height: '24px',
+                              borderRadius: '50%',
+                              backgroundColor: index < 3 ? '#f59e0b' : '#e5e7eb',
+                              color: index < 3 ? 'white' : '#666',
+                              fontWeight: 'bold',
+                              fontSize: '0.8rem'
+                            }}>
+                              {index + 1}
+                            </span>
+                            <span>{book.title}</span>
+                          </div>
+                          <strong>{book.totalSold} sold</strong>
+                        </div>
+                      </div>
                     ))}
-                  </tbody>
-                </table>
+                  </div>
+                  
+                  {/* Desktop view */}
+                  <div className="reports-desktop-table">
+                    <table className="table">
+                      <thead>
+                        <tr>
+                          <th>Rank</th>
+                          <th>Book</th>
+                          <th>Units Sold</th>
+                        </tr>
+                      </thead>
+                      <tbody>
+                        {salesReport.bestSellingBooks.map((book, index) => (
+                          <tr key={index}>
+                            <td>
+                              <span style={{ 
+                                display: 'inline-block',
+                                width: '24px',
+                                height: '24px',
+                                borderRadius: '50%',
+                                backgroundColor: index < 3 ? '#f59e0b' : '#e5e7eb',
+                                color: index < 3 ? 'white' : '#666',
+                                textAlign: 'center',
+                                lineHeight: '24px',
+                                fontWeight: 'bold',
+                                fontSize: '0.8rem'
+                              }}>
+                                {index + 1}
+                              </span>
+                            </td>
+                            <td>{book.title}</td>
+                            <td>{book.totalSold}</td>
+                          </tr>
+                        ))}
+                      </tbody>
+                    </table>
+                  </div>
+                </>
               ) : (
                 <p className="text-muted">No sales data yet</p>
               )}
