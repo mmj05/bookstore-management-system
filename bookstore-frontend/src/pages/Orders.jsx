@@ -58,11 +58,11 @@ function Orders() {
   };
 
   if (loading) {
-    return <div className="container"><div className="loading">Loading orders...</div></div>;
+    return <div className="container" style={{ paddingTop: '90px' }}><div className="loading">Loading orders...</div></div>;
   }
 
   return (
-    <div className="container">
+    <div className="container" style={{ paddingTop: '90px', paddingBottom: '60px' }}>
       <div className="page-header">
         <h1>My Orders</h1>
         <p className="text-muted">View your order history and track deliveries</p>
