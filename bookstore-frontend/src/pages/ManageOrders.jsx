@@ -103,11 +103,10 @@ function ManageOrders() {
       {error && <div className="alert alert-error">{error}</div>}
 
       <div className="card mb-20">
-        <div className="flex gap-10 flex-center">
+        <div className="manage-orders-filter">
           <label>Filter by Status:</label>
           <select
             className="form-control"
-            style={{ width: 'auto' }}
             value={statusFilter}
             onChange={(e) => { setStatusFilter(e.target.value); setPage(0); }}
           >
@@ -128,53 +127,102 @@ function ManageOrders() {
           <div className="empty-state"><h3>No orders found</h3></div>
         ) : (
           <>
-            <table className="table">
-              <thead>
-                <tr>
-                  <th>Order #</th>
-                  <th>Customer</th>
-                  <th>Date</th>
-                  <th>Items</th>
-                  <th>Total</th>
-                  <th>Status</th>
-                  <th>Actions</th>
-                </tr>
-              </thead>
-              <tbody>
-                {orders.map(order => (
-                  <tr key={order.id}>
-                    <td>{order.orderNumber}</td>
-                    <td>
-                      {order.customerName}<br />
-                      <small className="text-muted">{order.customerEmail}</small>
-                    </td>
-                    <td>{formatDate(order.createdAt)}</td>
-                    <td>{order.items?.length || 0}</td>
-                    <td>${order.total.toFixed(2)}</td>
-                    <td><span className={getStatusBadge(order.status)}>{order.status}</span></td>
-                    <td>
-                      {getNextStatuses(order.status).length > 0 && (
-                        <button 
-                          className="btn btn-primary btn-sm"
-                          onClick={() => openUpdateModal(order)}
-                        >
-                          Update Status
-                        </button>
-                      )}
-                    </td>
-                  </tr>
-                ))}
-              </tbody>
-            </table>
+            {/* Mobile Card View */}
+            <div className="manage-orders-mobile-view">
+              {orders.map(order => (
+                <div key={order.id} className="manage-order-card">
+                  <div className="manage-order-header">
+                    <div>
+                      <div className="manage-order-number">#{order.orderNumber}</div>
+                      <div className="manage-order-customer">
+                        {order.customerName}
+                        <br />
+                        <small className="text-muted">{order.customerEmail}</small>
+                      </div>
+                    </div>
+                    <span className={getStatusBadge(order.status)}>{order.status}</span>
+                  </div>
+                  <div className="manage-order-details">
+                    <div className="manage-order-row">
+                      <span className="text-muted">Date:</span>
+                      <span>{formatDate(order.createdAt)}</span>
+                    </div>
+                    <div className="manage-order-row">
+                      <span className="text-muted">Items:</span>
+                      <span>{order.items?.length || 0}</span>
+                    </div>
+                    <div className="manage-order-row">
+                      <span className="text-muted">Total:</span>
+                      <strong style={{ color: 'var(--success-600)' }}>${order.total.toFixed(2)}</strong>
+                    </div>
+                  </div>
+                  {getNextStatuses(order.status).length > 0 && (
+                    <div className="manage-order-actions">
+                      <button 
+                        className="btn btn-primary btn-sm"
+                        onClick={() => openUpdateModal(order)}
+                        style={{ width: '100%' }}
+                      >
+                        Update Status
+                      </button>
+                    </div>
+                  )}
+                </div>
+              ))}
+            </div>
+
+            {/* Desktop Table View */}
+            <div className="manage-orders-table-view">
+              <div className="table-responsive">
+                <table className="table">
+                  <thead>
+                    <tr>
+                      <th>Order #</th>
+                      <th>Customer</th>
+                      <th>Date</th>
+                      <th>Items</th>
+                      <th>Total</th>
+                      <th>Status</th>
+                      <th className="actions-column">Actions</th>
+                    </tr>
+                  </thead>
+                  <tbody>
+                    {orders.map(order => (
+                      <tr key={order.id}>
+                        <td>{order.orderNumber}</td>
+                        <td>
+                          {order.customerName}<br />
+                          <small className="text-muted">{order.customerEmail}</small>
+                        </td>
+                        <td>{formatDate(order.createdAt)}</td>
+                        <td>{order.items?.length || 0}</td>
+                        <td>${order.total.toFixed(2)}</td>
+                        <td><span className={getStatusBadge(order.status)}>{order.status}</span></td>
+                        <td className="actions-column">
+                          {getNextStatuses(order.status).length > 0 && (
+                            <button 
+                              className="btn btn-primary btn-sm"
+                              onClick={() => openUpdateModal(order)}
+                            >
+                              Update Status
+                            </button>
+                          )}
+                        </td>
+                      </tr>
+                    ))}
+                  </tbody>
+                </table>
+              </div>
+            </div>
 
             {totalPages > 1 && (
-              <div className="flex flex-center gap-10 mt-20" style={{ justifyContent: 'center' }}>
+              <div className="pagination-controls">
                 <button 
                   className="btn btn-secondary btn-sm"
                   onClick={() => setPage(p => Math.max(0, p - 1))}
                   disabled={page === 0}
                 >Previous</button>
-                <span>Page {page + 1} of {totalPages}</span>
+                <span className="pagination-info">Page {page + 1} of {totalPages}</span>
                 <button 
                   className="btn btn-secondary btn-sm"
                   onClick={() => setPage(p => Math.min(totalPages - 1, p + 1))}
@@ -187,12 +235,8 @@ function ManageOrders() {
       </div>
 
       {showUpdateModal && selectedOrder && (
-        <div style={{
-          position: 'fixed', top: 0, left: 0, right: 0, bottom: 0,
-          background: 'rgba(0,0,0,0.5)', display: 'flex',
-          alignItems: 'center', justifyContent: 'center', zIndex: 1000,
-        }}>
-          <div className="card" style={{ width: '400px' }}>
+        <div className="modal-overlay">
+          <div className="modal-content modal-sm">
             <h3 className="card-title">Update Order #{selectedOrder.orderNumber}</h3>
             <form onSubmit={handleUpdateStatus}>
               <div className="form-group">
@@ -232,7 +276,7 @@ function ManageOrders() {
                 />
               </div>
 
-              <div className="flex gap-10">
+              <div className="modal-actions">
                 <button type="submit" className="btn btn-primary">Update</button>
                 <button type="button" className="btn btn-secondary" onClick={() => setShowUpdateModal(false)}>Cancel</button>
               </div>
