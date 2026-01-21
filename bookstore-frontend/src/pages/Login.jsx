@@ -47,8 +47,7 @@ function Login() {
       display: 'flex',
       alignItems: 'center',
       justifyContent: 'center',
-      padding: '40px 20px',
-      background: 'linear-gradient(135deg, var(--gray-50) 0%, var(--gray-100) 100%)'
+      padding: '100px 20px 60px'
     }}>
       <div style={{ width: '100%', maxWidth: '420px' }}>
         {/* Session Expired Alert */}
@@ -68,27 +67,27 @@ function Login() {
             width: '70px',
             height: '70px',
             margin: '0 auto 20px',
-            background: 'linear-gradient(135deg, var(--primary-800) 0%, var(--primary-700) 100%)',
+            background: 'linear-gradient(135deg, var(--gold) 0%, var(--gold-dark) 100%)',
             borderRadius: '16px',
             display: 'flex',
             alignItems: 'center',
             justifyContent: 'center',
-            boxShadow: '0 10px 30px rgba(30, 41, 59, 0.2)'
+            boxShadow: '0 10px 30px rgba(201, 160, 64, 0.3)'
           }}>
-            <svg width="36" height="36" viewBox="0 0 24 24" fill="none" stroke="white" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+            <svg width="36" height="36" viewBox="0 0 24 24" fill="none" stroke="var(--text-inverse)" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round">
               <path d="M4 19.5A2.5 2.5 0 0 1 6.5 17H20"></path>
               <path d="M6.5 2H20v20H6.5A2.5 2.5 0 0 1 4 19.5v-15A2.5 2.5 0 0 1 6.5 2z"></path>
             </svg>
           </div>
           <h1 style={{ 
-            fontFamily: "'Merriweather', Georgia, serif",
-            fontSize: '1.5rem',
-            color: 'var(--primary-800)',
+            fontFamily: "'Playfair Display', Georgia, serif",
+            fontSize: '1.6rem',
+            color: 'var(--text-primary)',
             marginBottom: '8px'
           }}>
             Blackwood Rare Books
           </h1>
-          <p style={{ color: 'var(--gray-500)' }}>
+          <p style={{ color: 'var(--text-secondary)' }}>
             Sign in to your account
           </p>
         </div>
@@ -142,7 +141,7 @@ function Login() {
             </button>
           </form>
           
-          <p className="text-center mt-20" style={{ color: 'var(--gray-600)' }}>
+          <p className="text-center mt-20" style={{ color: 'var(--text-secondary)' }}>
             Don't have an account? <Link to="/register" style={{ fontWeight: '600' }}>Create one</Link>
           </p>
         </div>
@@ -151,9 +150,9 @@ function Login() {
         <div style={{ 
           marginTop: '24px',
           padding: '20px',
-          background: 'white',
+          background: 'var(--bg-card)',
           borderRadius: '12px',
-          border: '1px solid var(--gray-200)'
+          border: '1px solid var(--border-subtle)'
         }}>
           <div style={{ 
             display: 'flex', 
@@ -161,11 +160,11 @@ function Login() {
             gap: '10px',
             marginBottom: '12px',
             paddingBottom: '12px',
-            borderBottom: '1px solid var(--gray-100)'
+            borderBottom: '1px solid var(--border-subtle)'
           }}>
             <span style={{ 
-              background: 'var(--accent-500)', 
-              color: 'white', 
+              background: 'linear-gradient(135deg, var(--gold) 0%, var(--gold-dark) 100%)', 
+              color: 'var(--text-inverse)', 
               padding: '4px 10px', 
               borderRadius: '20px',
               fontSize: '0.75rem',
@@ -173,26 +172,26 @@ function Login() {
             }}>
               DEMO
             </span>
-            <span style={{ fontWeight: '600', color: 'var(--gray-700)', fontSize: '0.9rem' }}>
+            <span style={{ fontWeight: '600', color: 'var(--text-primary)', fontSize: '0.9rem' }}>
               Test Accounts
             </span>
           </div>
           <div style={{ display: 'grid', gap: '8px', fontSize: '0.85rem' }}>
-            <div style={{ display: 'flex', justifyContent: 'space-between', color: 'var(--gray-600)' }}>
+            <div style={{ display: 'flex', justifyContent: 'space-between', color: 'var(--text-secondary)' }}>
               <span>Admin:</span>
-              <code style={{ background: 'var(--gray-50)', padding: '2px 8px', borderRadius: '4px' }}>
+              <code style={{ background: 'var(--bg-elevated)', padding: '2px 8px', borderRadius: '4px', color: 'var(--gold)' }}>
                 admin@bookstore.com / Admin@123
               </code>
             </div>
-            <div style={{ display: 'flex', justifyContent: 'space-between', color: 'var(--gray-600)' }}>
+            <div style={{ display: 'flex', justifyContent: 'space-between', color: 'var(--text-secondary)' }}>
               <span>Manager:</span>
-              <code style={{ background: 'var(--gray-50)', padding: '2px 8px', borderRadius: '4px' }}>
+              <code style={{ background: 'var(--bg-elevated)', padding: '2px 8px', borderRadius: '4px', color: 'var(--gold)' }}>
                 manager@bookstore.com / Manager@123
               </code>
             </div>
-            <div style={{ display: 'flex', justifyContent: 'space-between', color: 'var(--gray-600)' }}>
+            <div style={{ display: 'flex', justifyContent: 'space-between', color: 'var(--text-secondary)' }}>
               <span>Customer:</span>
-              <code style={{ background: 'var(--gray-50)', padding: '2px 8px', borderRadius: '4px' }}>
+              <code style={{ background: 'var(--bg-elevated)', padding: '2px 8px', borderRadius: '4px', color: 'var(--gold)' }}>
                 customer@example.com / Customer@123
               </code>
             </div>
