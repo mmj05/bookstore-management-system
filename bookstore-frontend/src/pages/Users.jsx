@@ -131,8 +131,8 @@ function Users() {
   };
 
   return (
-    <div className="container">
-      <div className="page-header flex flex-between flex-center">
+    <div className="container users-page">
+      <div className="page-header">
         <div>
           <h1>User Management</h1>
           <p className="text-muted">Manage user accounts and roles</p>
@@ -147,8 +147,8 @@ function Users() {
 
       {/* Search and Filter */}
       <div className="card mb-20">
-        <div className="flex gap-20">
-          <form onSubmit={handleSearch} className="flex gap-10" style={{ flex: 1 }}>
+        <div className="users-filter-section">
+          <form onSubmit={handleSearch} className="users-search-form">
             <input
               type="text"
               className="form-control"
@@ -159,11 +159,10 @@ function Users() {
             <button type="submit" className="btn btn-primary">Search</button>
           </form>
           
-          <div className="flex gap-10 flex-center">
+          <div className="users-role-filter">
             <label>Role:</label>
             <select
               className="form-control"
-              style={{ width: 'auto' }}
               value={roleFilter}
               onChange={(e) => setRoleFilter(e.target.value)}
             >
@@ -176,44 +175,24 @@ function Users() {
         </div>
       </div>
 
-      {/* Users Table */}
+      {/* Users */}
       <div className="card">
         {loading ? (
           <div className="loading">Loading users...</div>
         ) : users.length === 0 ? (
           <div className="empty-state"><h3>No users found</h3></div>
         ) : (
-          <table className="table">
-            <thead>
-              <tr>
-                <th>Name</th>
-                <th>Email</th>
-                <th>Role</th>
-                <th>Status</th>
-                <th>Created</th>
-                <th>Last Login</th>
-                <th>Actions</th>
-              </tr>
-            </thead>
-            <tbody>
+          <>
+            {/* Mobile Card View */}
+            <div className="users-mobile-view">
               {users.map(user => (
-                <tr key={user.id}>
-                  <td>{user.firstName} {user.lastName}</td>
-                  <td>{user.email}</td>
-                  <td>
-                    <select
-                      className="form-control"
-                      style={{ width: 'auto', padding: '5px' }}
-                      value={user.role}
-                      onChange={(e) => handleRoleChange(user.id, e.target.value)}
-                    >
-                      <option value="CUSTOMER">Customer</option>
-                      <option value="MANAGER">Manager</option>
-                      <option value="ADMINISTRATOR">Administrator</option>
-                    </select>
-                  </td>
-                  <td>
-                    <div className="flex gap-5" style={{ flexWrap: 'wrap' }}>
+                <div key={user.id} className="user-card">
+                  <div className="user-card-header">
+                    <div>
+                      <div className="user-card-name">{user.firstName} {user.lastName}</div>
+                      <div className="user-card-email">{user.email}</div>
+                    </div>
+                    <div className="user-card-badges">
                       {user.isActive ? (
                         <span className="badge badge-success">Active</span>
                       ) : (
@@ -223,54 +202,149 @@ function Users() {
                         <span className="badge badge-warning">Locked</span>
                       )}
                     </div>
-                  </td>
-                  <td>{formatDate(user.createdAt)}</td>
-                  <td>{formatDate(user.lastLoginAt)}</td>
-                  <td>
-                    <div className="flex gap-10">
-                      {user.isActive ? (
-                        <button 
-                          className="btn btn-danger btn-sm"
-                          onClick={() => handleDeactivate(user.id)}
-                        >
-                          Deactivate
-                        </button>
-                      ) : (
-                        <button 
-                          className="btn btn-success btn-sm"
-                          onClick={() => handleActivate(user.id)}
-                        >
-                          Activate
-                        </button>
-                      )}
-                      {user.isLocked && (
-                        <button 
-                          className="btn btn-warning btn-sm"
-                          onClick={() => handleUnlock(user.id)}
-                        >
-                          Unlock
-                        </button>
-                      )}
+                  </div>
+                  <div className="user-card-details">
+                    <div className="user-card-row">
+                      <span className="user-card-label">Role:</span>
+                      <select
+                        className="form-control"
+                        style={{ width: 'auto', padding: '5px' }}
+                        value={user.role}
+                        onChange={(e) => handleRoleChange(user.id, e.target.value)}
+                      >
+                        <option value="CUSTOMER">Customer</option>
+                        <option value="MANAGER">Manager</option>
+                        <option value="ADMINISTRATOR">Administrator</option>
+                      </select>
                     </div>
-                  </td>
-                </tr>
+                    <div className="user-card-row">
+                      <span className="user-card-label">Created:</span>
+                      <span>{formatDate(user.createdAt)}</span>
+                    </div>
+                    <div className="user-card-row">
+                      <span className="user-card-label">Last Login:</span>
+                      <span>{formatDate(user.lastLoginAt)}</span>
+                    </div>
+                  </div>
+                  <div className="user-card-actions">
+                    {user.isActive ? (
+                      <button 
+                        className="btn btn-danger btn-sm"
+                        onClick={() => handleDeactivate(user.id)}
+                      >
+                        Deactivate
+                      </button>
+                    ) : (
+                      <button 
+                        className="btn btn-success btn-sm"
+                        onClick={() => handleActivate(user.id)}
+                      >
+                        Activate
+                      </button>
+                    )}
+                    {user.isLocked && (
+                      <button 
+                        className="btn btn-warning btn-sm"
+                        onClick={() => handleUnlock(user.id)}
+                      >
+                        Unlock
+                      </button>
+                    )}
+                  </div>
+                </div>
               ))}
-            </tbody>
-          </table>
+            </div>
+
+            {/* Desktop Table View */}
+            <div className="users-table-view">
+              <div className="table-responsive">
+                <table className="table">
+                  <thead>
+                    <tr>
+                      <th>Name</th>
+                      <th>Email</th>
+                      <th>Role</th>
+                      <th>Status</th>
+                      <th>Created</th>
+                      <th>Last Login</th>
+                      <th className="actions-column">Actions</th>
+                    </tr>
+                  </thead>
+                  <tbody>
+                    {users.map(user => (
+                      <tr key={user.id}>
+                        <td>{user.firstName} {user.lastName}</td>
+                        <td>{user.email}</td>
+                        <td>
+                          <select
+                            className="form-control"
+                            style={{ width: 'auto', padding: '5px' }}
+                            value={user.role}
+                            onChange={(e) => handleRoleChange(user.id, e.target.value)}
+                          >
+                            <option value="CUSTOMER">Customer</option>
+                            <option value="MANAGER">Manager</option>
+                            <option value="ADMINISTRATOR">Administrator</option>
+                          </select>
+                        </td>
+                        <td>
+                          <div className="flex gap-5" style={{ flexWrap: 'wrap' }}>
+                            {user.isActive ? (
+                              <span className="badge badge-success">Active</span>
+                            ) : (
+                              <span className="badge badge-danger">Inactive</span>
+                            )}
+                            {user.isLocked && (
+                              <span className="badge badge-warning">Locked</span>
+                            )}
+                          </div>
+                        </td>
+                        <td>{formatDate(user.createdAt)}</td>
+                        <td>{formatDate(user.lastLoginAt)}</td>
+                        <td className="actions-column">
+                          <div className="action-buttons">
+                            {user.isActive ? (
+                              <button 
+                                className="btn btn-danger btn-sm"
+                                onClick={() => handleDeactivate(user.id)}
+                              >
+                                Deactivate
+                              </button>
+                            ) : (
+                              <button 
+                                className="btn btn-success btn-sm"
+                                onClick={() => handleActivate(user.id)}
+                              >
+                                Activate
+                              </button>
+                            )}
+                            {user.isLocked && (
+                              <button 
+                                className="btn btn-warning btn-sm"
+                                onClick={() => handleUnlock(user.id)}
+                              >
+                                Unlock
+                              </button>
+                            )}
+                          </div>
+                        </td>
+                      </tr>
+                    ))}
+                  </tbody>
+                </table>
+              </div>
+            </div>
+          </>
         )}
       </div>
 
       {/* Create User Modal */}
       {showCreateModal && (
-        <div style={{
-          position: 'fixed', top: 0, left: 0, right: 0, bottom: 0,
-          background: 'rgba(0,0,0,0.5)', display: 'flex',
-          alignItems: 'center', justifyContent: 'center', zIndex: 1000,
-        }}>
-          <div className="card" style={{ width: '450px' }}>
+        <div className="modal-overlay">
+          <div className="modal-content modal-sm">
             <h3 className="card-title">Create New User</h3>
             <form onSubmit={handleCreateUser}>
-              <div className="grid grid-2">
+              <div className="modal-form-grid">
                 <div className="form-group">
                   <label>First Name *</label>
                   <input
@@ -340,7 +414,7 @@ function Users() {
                 </select>
               </div>
 
-              <div className="flex gap-10">
+              <div className="modal-actions">
                 <button type="submit" className="btn btn-primary">Create User</button>
                 <button type="button" className="btn btn-secondary" onClick={() => setShowCreateModal(false)}>
                   Cancel
