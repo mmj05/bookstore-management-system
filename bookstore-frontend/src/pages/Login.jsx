@@ -1,4 +1,4 @@
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
 import { useAuth } from '../context/AuthContext';
 
@@ -7,12 +7,22 @@ function Login() {
   const [password, setPassword] = useState('');
   const [error, setError] = useState('');
   const [loading, setLoading] = useState(false);
-  const { login } = useAuth();
+  const { login, sessionExpired, clearSessionExpired } = useAuth();
   const navigate = useNavigate();
+
+  // Clear session expired message when component unmounts or user starts typing
+  useEffect(() => {
+    return () => {
+      if (sessionExpired) {
+        clearSessionExpired();
+      }
+    };
+  }, [sessionExpired, clearSessionExpired]);
 
   const handleSubmit = async (e) => {
     e.preventDefault();
     setError('');
+    clearSessionExpired();
     setLoading(true);
 
     try {
@@ -32,21 +42,69 @@ function Login() {
   };
 
   return (
-    <div className="container">
-      <div style={{ maxWidth: '400px', margin: '0 auto' }}>
-        <div className="card">
-          <h2 className="card-title text-center">Login</h2>
-          
+    <div style={{ 
+      minHeight: 'calc(100vh - 70px)',
+      display: 'flex',
+      alignItems: 'center',
+      justifyContent: 'center',
+      padding: '40px 20px',
+      background: 'linear-gradient(135deg, var(--gray-50) 0%, var(--gray-100) 100%)'
+    }}>
+      <div style={{ width: '100%', maxWidth: '420px' }}>
+        {/* Session Expired Alert */}
+        {sessionExpired && (
+          <div className="alert alert-warning" style={{ marginBottom: '20px' }}>
+            <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" style={{ flexShrink: 0 }}>
+              <circle cx="12" cy="12" r="10"></circle>
+              <polyline points="12 6 12 12 16 14"></polyline>
+            </svg>
+            Your session has expired. Please sign in again to continue.
+          </div>
+        )}
+
+        {/* Logo/Header */}
+        <div style={{ textAlign: 'center', marginBottom: '30px' }}>
+          <div style={{
+            width: '70px',
+            height: '70px',
+            margin: '0 auto 20px',
+            background: 'linear-gradient(135deg, var(--primary-800) 0%, var(--primary-700) 100%)',
+            borderRadius: '16px',
+            display: 'flex',
+            alignItems: 'center',
+            justifyContent: 'center',
+            boxShadow: '0 10px 30px rgba(30, 41, 59, 0.2)'
+          }}>
+            <svg width="36" height="36" viewBox="0 0 24 24" fill="none" stroke="white" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+              <path d="M4 19.5A2.5 2.5 0 0 1 6.5 17H20"></path>
+              <path d="M6.5 2H20v20H6.5A2.5 2.5 0 0 1 4 19.5v-15A2.5 2.5 0 0 1 6.5 2z"></path>
+            </svg>
+          </div>
+          <h1 style={{ 
+            fontFamily: "'Merriweather', Georgia, serif",
+            fontSize: '1.5rem',
+            color: 'var(--primary-800)',
+            marginBottom: '8px'
+          }}>
+            Blackwood Rare Books
+          </h1>
+          <p style={{ color: 'var(--gray-500)' }}>
+            Sign in to your account
+          </p>
+        </div>
+
+        <div className="card" style={{ padding: '32px' }}>
           {error && <div className="alert alert-error">{error}</div>}
           
           <form onSubmit={handleSubmit}>
             <div className="form-group">
-              <label>Email</label>
+              <label>Email Address</label>
               <input
                 type="email"
                 className="form-control"
                 value={email}
                 onChange={(e) => setEmail(e.target.value)}
+                placeholder="you@example.com"
                 required
               />
             </div>
@@ -58,37 +116,86 @@ function Login() {
                 className="form-control"
                 value={password}
                 onChange={(e) => setPassword(e.target.value)}
+                placeholder="Enter your password"
                 required
               />
             </div>
             
             <button 
               type="submit" 
-              className="btn btn-primary" 
-              style={{ width: '100%' }}
+              className="btn btn-primary btn-lg" 
+              style={{ width: '100%', marginTop: '10px' }}
               disabled={loading}
             >
-              {loading ? 'Logging in...' : 'Login'}
+              {loading ? (
+                <span>Signing in...</span>
+              ) : (
+                <>
+                  <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+                    <path d="M15 3h4a2 2 0 0 1 2 2v14a2 2 0 0 1-2 2h-4"></path>
+                    <polyline points="10 17 15 12 10 7"></polyline>
+                    <line x1="15" y1="12" x2="3" y2="12"></line>
+                  </svg>
+                  Sign In
+                </>
+              )}
             </button>
           </form>
           
-          <p className="text-center mt-20">
-            Don't have an account? <Link to="/register">Register here</Link>
+          <p className="text-center mt-20" style={{ color: 'var(--gray-600)' }}>
+            Don't have an account? <Link to="/register" style={{ fontWeight: '600' }}>Create one</Link>
           </p>
+        </div>
 
-          <div className="mt-20" style={{ background: '#f8f9fa', padding: '15px', borderRadius: '4px' }}>
-            <p className="text-muted" style={{ fontSize: '0.9rem', marginBottom: '10px' }}>
-              <strong>Test Accounts:</strong>
-            </p>
-            <p style={{ fontSize: '0.85rem', marginBottom: '5px' }}>
-              Admin: admin@bookstore.com / Admin@123
-            </p>
-            <p style={{ fontSize: '0.85rem', marginBottom: '5px' }}>
-              Manager: manager@bookstore.com / Manager@123
-            </p>
-            <p style={{ fontSize: '0.85rem' }}>
-              Customer: customer@example.com / Customer@123
-            </p>
+        {/* Test Accounts Info */}
+        <div style={{ 
+          marginTop: '24px',
+          padding: '20px',
+          background: 'white',
+          borderRadius: '12px',
+          border: '1px solid var(--gray-200)'
+        }}>
+          <div style={{ 
+            display: 'flex', 
+            alignItems: 'center', 
+            gap: '10px',
+            marginBottom: '12px',
+            paddingBottom: '12px',
+            borderBottom: '1px solid var(--gray-100)'
+          }}>
+            <span style={{ 
+              background: 'var(--accent-500)', 
+              color: 'white', 
+              padding: '4px 10px', 
+              borderRadius: '20px',
+              fontSize: '0.75rem',
+              fontWeight: '600'
+            }}>
+              DEMO
+            </span>
+            <span style={{ fontWeight: '600', color: 'var(--gray-700)', fontSize: '0.9rem' }}>
+              Test Accounts
+            </span>
+          </div>
+          <div style={{ display: 'grid', gap: '8px', fontSize: '0.85rem' }}>
+            <div style={{ display: 'flex', justifyContent: 'space-between', color: 'var(--gray-600)' }}>
+              <span>Admin:</span>
+              <code style={{ background: 'var(--gray-50)', padding: '2px 8px', borderRadius: '4px' }}>
+                admin@bookstore.com / Admin@123
+              </code>
+            </div>
+            <div style={{ display: 'flex', justifyContent: 'space-between', color: 'var(--gray-600)' }}>
+              <span>Manager:</span>
+              <code style={{ background: 'var(--gray-50)', padding: '2px 8px', borderRadius: '4px' }}>
+                manager@bookstore.com / Manager@123
+              </code>
+            </div>
+            <div style={{ display: 'flex', justifyContent: 'space-between', color: 'var(--gray-600)' }}>
+              <span>Customer:</span>
+              <code style={{ background: 'var(--gray-50)', padding: '2px 8px', borderRadius: '4px' }}>
+                customer@example.com / Customer@123
+              </code>
+            </div>
           </div>
         </div>
       </div>
