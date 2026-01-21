@@ -87,7 +87,7 @@ function BookDetail() {
 
   if (loading) {
     return (
-      <div className="container" style={{ paddingTop: '30px' }}>
+      <div className="container" style={{ paddingTop: '90px' }}>
         <div className="loading">Loading book details...</div>
       </div>
     );
@@ -95,7 +95,7 @@ function BookDetail() {
 
   if (error || !book) {
     return (
-      <div className="container" style={{ paddingTop: '30px' }}>
+      <div className="container" style={{ paddingTop: '90px' }}>
         <div className="alert alert-error">{error || 'Book not found'}</div>
         <Link to="/books" className="btn btn-secondary">← Back to Books</Link>
       </div>
@@ -103,7 +103,7 @@ function BookDetail() {
   }
 
   return (
-    <div className="container" style={{ paddingTop: '30px', paddingBottom: '60px' }}>
+    <div className="container" style={{ paddingTop: '90px', paddingBottom: '60px' }}>
       <div className="mb-20">
         <Link to="/books" className="btn btn-secondary btn-sm">← Back to Books</Link>
       </div>
