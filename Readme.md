@@ -6,8 +6,8 @@ A web-based bookstore management system with inventory tracking, online book bro
 
 ## Team Members
 
-- **Daniel Reyes** - Scrum Master
 - **Tyler Barnett** - Product Owner
+- **Daniel Reyes** - Scrum Master
 - **Muhaimin Jobayer** - Development Team
 - **Matthew Parra** - Development Team
 - **Russel Scales** - Development Team
