@@ -149,10 +149,7 @@ button {
    ========================================== */
 
 .navbar {
-  position: fixed;
-  top: 0;
-  left: 0;
-  right: 0;
+  position: relative;
   width: 100%;
   background: rgba(26, 20, 16, 0.95);
   backdrop-filter: blur(20px);
@@ -227,12 +224,12 @@ button {
    ========================================== */
 
 .hero {
-  min-height: 100vh;
+  min-height: calc(100vh - 70px);
   display: flex;
   align-items: center;
   justify-content: center;
   position: relative;
-  padding: 100px 24px 80px;
+  padding: 40px 24px 80px;
   overflow: hidden;
   margin-bottom: 0;
 }
@@ -1473,7 +1470,7 @@ select.form-control option {
    ========================================== */
 
 .inventory-page {
-  padding-top: 90px;
+  padding-top: 40px;
   padding-bottom: 60px;
 }
 
@@ -1814,7 +1811,7 @@ select.form-control option {
 
 @media (max-width: 480px) {
   .inventory-page {
-    padding-top: 80px;
+    padding-top: 40px;
   }
 
   .inventory-header h1 {
@@ -1844,7 +1841,7 @@ select.form-control option {
    ========================================== */
 
 .users-page {
-  padding-top: 90px;
+  padding-top: 40px;
 }
 
 .users-page .page-header {
@@ -2230,7 +2227,7 @@ select.form-control option {
 
 .cart-summary {
   position: sticky;
-  top: 100px;
+  top: 20px;
 }
 
 /* Cart mobile view */
@@ -2245,7 +2242,7 @@ select.form-control option {
 @media (max-width: 768px) {
   /* Users Page */
   .users-page {
-    padding-top: 80px;
+    padding-top: 40px;
   }
 
   .users-page .page-header {
@@ -2494,5 +2491,10 @@ input[type="number"]::-webkit-inner-spin-button {
    ========================================== */
 
 .page-with-navbar {
-  padding-top: 110px;
+  padding-top: 40px;
+}
+
+/* Main content - no offset needed since navbar is not fixed */
+main {
+  padding-top: 0 !important;
 }
