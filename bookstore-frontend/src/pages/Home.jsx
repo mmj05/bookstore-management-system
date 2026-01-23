@@ -1,7 +1,7 @@
 import { useState, useEffect } from 'react';
 import { Link } from 'react-router-dom';
 import { useAuth } from '../context/AuthContext';
-import { booksAPI } from '../services/api';
+import { booksAPI, categoriesAPI } from '../services/api';
 
 // Book card component that looks like a real book
 function BookCard({ book, index }) {
@@ -48,11 +48,15 @@ function Home() {
 
   const fetchFeaturedBooks = async () => {
     try {
-      const response = await booksAPI.filter({ page: 0, size: 10, inStock: true });
-      setFeaturedBooks(response.data.data.content);
+      const [booksResponse, categoriesResponse] = await Promise.all([
+        booksAPI.filter({ page: 0, size: 10, inStock: true }),
+        categoriesAPI.getAll()
+      ]);
+
+      setFeaturedBooks(booksResponse.data.data.content);
       setBookStats({
-        total: response.data.data.totalElements,
-        categories: new Set(response.data.data.content.flatMap(b => b.categories?.map(c => c.name) || [])).size
+        total: booksResponse.data.data.totalElements,
+        categories: categoriesResponse.data.data.length
       });
     } catch (err) {
       console.error('Error fetching books:', err);
@@ -99,7 +103,7 @@ function Home() {
               <span className="hero-stat-label">Rare Books</span>
             </div>
             <div className="hero-stat">
-              <span className="hero-stat-number">6+</span>
+              <span className="hero-stat-number">{bookStats.categories}+</span>
               <span className="hero-stat-label">Categories</span>
             </div>
             <div className="hero-stat">
@@ -234,7 +238,7 @@ function Home() {
           <h3>About Blackwood Rare Books</h3>
           <p>
             Blackwood Rare Books is your premier destination for rare, collectible, and hard-to-find books.
-            Since 1892, we have been curating exceptional literary treasures from around the world.
+            Since 2026, we have been curating exceptional literary treasures from around the world.
             Whether you're a collector seeking a first edition or a reader looking for timeless classics,
             our carefully curated collection has something special for you.
           </p>
