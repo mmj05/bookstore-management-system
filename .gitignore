@@ -77,7 +77,7 @@ spring-boot-*.log
 
 # Application properties (if containing secrets)
 # Uncomment if you have sensitive data in application.properties
-# bookstore-api/src/main/resources/application.properties
+bookstore-api/src/main/resources/application.properties
 
 # Environment variables
 .env
@@ -101,6 +101,7 @@ coverage/
 application-local.properties
 application-dev.properties
 application-prod.properties
+render.yaml
 
 # Frontend - Node.js
 node_modules/
