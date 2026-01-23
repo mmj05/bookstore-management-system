@@ -1,6 +1,7 @@
 import { Routes, Route, Navigate } from 'react-router-dom';
 import { useAuth } from './context/AuthContext';
 import Navbar from './components/Navbar';
+import Footer from './components/Footer';
 import Home from './pages/Home';
 import Login from './pages/Login';
 import Register from './pages/Register';
@@ -41,75 +42,76 @@ function App() {
           <Route path="/register" element={<Register />} />
           <Route path="/books" element={<Books />} />
           <Route path="/books/:id" element={<BookDetail />} />
-          
+
           {/* Customer routes */}
-          <Route 
-            path="/cart" 
+          <Route
+            path="/cart"
             element={
               <ProtectedRoute allowedRoles={['CUSTOMER']}>
                 <Cart />
               </ProtectedRoute>
-            } 
+            }
           />
-          <Route 
-            path="/orders" 
+          <Route
+            path="/orders"
             element={
               <ProtectedRoute allowedRoles={['CUSTOMER']}>
                 <Orders />
               </ProtectedRoute>
-            } 
+            }
           />
-          
+
           {/* Manager/Admin routes */}
-          <Route 
-            path="/inventory" 
+          <Route
+            path="/inventory"
             element={
               <ProtectedRoute allowedRoles={['MANAGER', 'ADMINISTRATOR']}>
                 <Inventory />
               </ProtectedRoute>
-            } 
+            }
           />
-          <Route 
-            path="/manage-orders" 
+          <Route
+            path="/manage-orders"
             element={
               <ProtectedRoute allowedRoles={['MANAGER', 'ADMINISTRATOR']}>
                 <ManageOrders />
               </ProtectedRoute>
-            } 
+            }
           />
-          <Route 
-            path="/reports" 
+          <Route
+            path="/reports"
             element={
               <ProtectedRoute allowedRoles={['MANAGER', 'ADMINISTRATOR']}>
                 <Reports />
               </ProtectedRoute>
-            } 
+            }
           />
-          
+
           {/* Admin only routes */}
-          <Route 
-            path="/users" 
+          <Route
+            path="/users"
             element={
               <ProtectedRoute allowedRoles={['ADMINISTRATOR']}>
                 <Users />
               </ProtectedRoute>
-            } 
+            }
           />
-          
+
           {/* Authenticated user routes */}
-          <Route 
-            path="/profile" 
+          <Route
+            path="/profile"
             element={
               <ProtectedRoute>
                 <Profile />
               </ProtectedRoute>
-            } 
+            }
           />
-          
+
           {/* Fallback */}
           <Route path="*" element={<Navigate to="/" />} />
         </Routes>
       </main>
+      <Footer />
     </div>
   );
 }
