@@ -189,7 +189,7 @@ function Books() {
   const hasActiveFilters = searchKeyword || isbnSearch || selectedCategory || minPrice || maxPrice || inStockOnly;
 
   return (
-    <div className="container" style={{ paddingTop: '90px', paddingBottom: '60px' }}>
+    <div className="container" style={{ paddingTop: '40px', paddingBottom: '60px' }}>
       <div className="page-header">
         <h1>Browse Books</h1>
         <p className="text-muted">

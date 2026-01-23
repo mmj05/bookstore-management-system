@@ -93,7 +93,7 @@ function ManageOrders() {
   };
 
   return (
-    <div className="container" style={{ paddingTop: '90px', paddingBottom: '60px' }}>
+    <div className="container" style={{ paddingTop: '40px', paddingBottom: '60px' }}>
       <div className="page-header">
         <h1>Order Management</h1>
         <p className="text-muted">View and manage customer orders</p>

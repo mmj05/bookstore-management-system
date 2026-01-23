@@ -9,8 +9,6 @@ function Register() {
     confirmPassword: '',
     firstName: '',
     lastName: '',
-    phone: '',
-    shippingAddress: '',
   });
   const [error, setError] = useState('');
   const [loading, setLoading] = useState(false);
@@ -52,12 +50,12 @@ function Register() {
   };
 
   return (
-    <div style={{ 
-      minHeight: 'calc(100vh - 70px)',
+    <div style={{
+      minHeight: 'calc(100vh - 130px)',
       display: 'flex',
       alignItems: 'center',
       justifyContent: 'center',
-      padding: '100px 20px 60px'
+      padding: '40px 20px 60px'
     }}>
       <div style={{ width: '100%', maxWidth: '520px' }}>
         {/* Logo/Header */}
@@ -135,19 +133,7 @@ function Register() {
                 required
               />
             </div>
-            
-            <div className="form-group">
-              <label>Phone Number</label>
-              <input
-                type="tel"
-                name="phone"
-                className="form-control"
-                value={formData.phone}
-                onChange={handleChange}
-                placeholder="+1 (555) 000-0000"
-              />
-            </div>
-            
+
             <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '16px' }}>
               <div className="form-group" style={{ marginBottom: '16px' }}>
                 <label>Password *</label>
@@ -199,20 +185,7 @@ function Register() {
                 Password must be at least 8 characters with uppercase, lowercase, number, and special character
               </p>
             </div>
-            
-            <div className="form-group">
-              <label>Shipping Address</label>
-              <textarea
-                name="shippingAddress"
-                className="form-control"
-                value={formData.shippingAddress}
-                onChange={handleChange}
-                rows="3"
-                placeholder="Enter your full shipping address"
-                style={{ resize: 'none' }}
-              />
-            </div>
-            
+
             <button 
               type="submit" 
               className="btn btn-primary btn-lg" 

@@ -102,7 +102,7 @@ function Cart() {
 
   if (loading) {
     return (
-      <div className="container" style={{ paddingTop: '90px' }}>
+      <div className="container" style={{ paddingTop: '40px' }}>
         <div className="loading">Loading cart...</div>
       </div>
     );
@@ -110,7 +110,7 @@ function Cart() {
 
   if (!cart || cart.items.length === 0) {
     return (
-      <div className="container" style={{ paddingTop: '30px', paddingBottom: '60px' }}>
+      <div className="container" style={{ paddingTop: '40px', paddingBottom: '60px' }}>
         <div className="empty-state">
           <div style={{ fontSize: '4rem', marginBottom: '20px' }}>🛒</div>
           <h3>Your cart is empty</h3>
@@ -122,7 +122,7 @@ function Cart() {
   }
 
   return (
-    <div className="container" style={{ paddingTop: '90px', paddingBottom: '60px' }}>
+    <div className="container" style={{ paddingTop: '40px', paddingBottom: '60px' }}>
       <div className="page-header">
         <h1>Shopping Cart</h1>
         <p className="text-muted">{cart.totalItems} {cart.totalItems === 1 ? 'item' : 'items'} in your cart</p>

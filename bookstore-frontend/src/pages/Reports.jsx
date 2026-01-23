@@ -37,11 +37,11 @@ function Reports() {
   };
 
   if (loading) {
-    return <div className="container" style={{ paddingTop: '90px' }}><div className="loading">Loading reports...</div></div>;
+    return <div className="container" style={{ paddingTop: '40px' }}><div className="loading">Loading reports...</div></div>;
   }
 
   return (
-    <div className="container" style={{ paddingTop: '90px', paddingBottom: '60px' }}>
+    <div className="container" style={{ paddingTop: '40px', paddingBottom: '60px' }}>
       <div className="page-header">
         <h1>Reports</h1>
         <p className="text-muted">Inventory and sales analytics</p>

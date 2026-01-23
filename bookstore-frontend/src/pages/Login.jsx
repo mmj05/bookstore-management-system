@@ -42,12 +42,12 @@ function Login() {
   };
 
   return (
-    <div style={{ 
-      minHeight: 'calc(100vh - 70px)',
+    <div style={{
+      minHeight: 'calc(100vh - 130px)',
       display: 'flex',
       alignItems: 'center',
       justifyContent: 'center',
-      padding: '100px 20px 60px'
+      padding: '40px 20px 60px'
     }}>
       <div style={{ width: '100%', maxWidth: '420px' }}>
         {/* Session Expired Alert */}
