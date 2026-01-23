@@ -81,15 +81,8 @@ function ManageOrders() {
     });
   };
 
-  const getNextStatuses = (currentStatus) => {
-    const transitions = {
-      PENDING: ['PROCESSING', 'CANCELLED'],
-      PROCESSING: ['SHIPPED', 'CANCELLED'],
-      SHIPPED: ['DELIVERED'],
-      DELIVERED: [],
-      CANCELLED: [],
-    };
-    return transitions[currentStatus] || [];
+  const getAllStatuses = () => {
+    return ['PENDING', 'PROCESSING', 'SHIPPED', 'DELIVERED', 'CANCELLED'];
   };
 
   return (
@@ -156,17 +149,15 @@ function ManageOrders() {
                       <strong style={{ color: 'var(--success-600)' }}>${order.total.toFixed(2)}</strong>
                     </div>
                   </div>
-                  {getNextStatuses(order.status).length > 0 && (
-                    <div className="manage-order-actions">
-                      <button 
-                        className="btn btn-primary btn-sm"
-                        onClick={() => openUpdateModal(order)}
-                        style={{ width: '100%' }}
-                      >
-                        Update Status
-                      </button>
-                    </div>
-                  )}
+                  <div className="manage-order-actions">
+                    <button
+                      className="btn btn-primary btn-sm"
+                      onClick={() => openUpdateModal(order)}
+                      style={{ width: '100%' }}
+                    >
+                      Update Status
+                    </button>
+                  </div>
                 </div>
               ))}
             </div>
@@ -199,14 +190,12 @@ function ManageOrders() {
                         <td>${order.total.toFixed(2)}</td>
                         <td><span className={getStatusBadge(order.status)}>{order.status}</span></td>
                         <td className="actions-column">
-                          {getNextStatuses(order.status).length > 0 && (
-                            <button 
-                              className="btn btn-primary btn-sm"
-                              onClick={() => openUpdateModal(order)}
-                            >
-                              Update Status
-                            </button>
-                          )}
+                          <button
+                            className="btn btn-primary btn-sm"
+                            onClick={() => openUpdateModal(order)}
+                          >
+                            Update Status
+                          </button>
                         </td>
                       </tr>
                     ))}
@@ -246,9 +235,10 @@ function ManageOrders() {
                   value={newStatus}
                   onChange={(e) => setNewStatus(e.target.value)}
                 >
-                  <option value={selectedOrder.status}>{selectedOrder.status} (current)</option>
-                  {getNextStatuses(selectedOrder.status).map(status => (
-                    <option key={status} value={status}>{status}</option>
+                  {getAllStatuses().map(status => (
+                    <option key={status} value={status}>
+                      {status}{status === selectedOrder.status ? ' (current)' : ''}
+                    </option>
                   ))}
                 </select>
               </div>
