@@ -4,6 +4,8 @@
 
 A web-based bookstore management system with inventory tracking, online book browsing, shopping cart, order management, and user administration.
 
+**Live Demo:** https://bookstore-management-system-9gp3.onrender.com
+
 ## Team Members
 
 - **Tyler Barnett** - Product Owner
@@ -111,6 +113,37 @@ npm run dev
 ```
 
 The frontend will start at `http://localhost:5173`
+
+## Running the Production Build
+
+The project includes pre-built production files ready to run.
+
+### Running the Backend
+
+Navigate to the backend directory and run the JAR file:
+
+```bash
+cd bookstore-api
+java -jar target/bookstore-api-1.0.0.jar
+```
+
+The API will be available at `http://localhost:8080`
+
+### Running the Frontend
+
+Navigate to the frontend directory and preview the production build:
+
+```bash
+cd bookstore-frontend
+npm run preview
+```
+
+The frontend will be available at `http://localhost:4173`
+
+### Serving the Frontend with a Web Server
+
+The `bookstore-frontend/dist/` folder contains the production-ready static files. These can be served using any web server such as Nginx, Apache, or deployed to static hosting services like Netlify, Vercel, or AWS S3
+
 
 ## Default Test Accounts
 
