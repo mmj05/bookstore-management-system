@@ -58,6 +58,9 @@ public class Order {
 
     private String trackingNumber;
 
+    @Enumerated(EnumType.STRING)
+    private ShippingCarrier shippingCarrier;
+
     private String paymentMethod;
 
     private String notes;

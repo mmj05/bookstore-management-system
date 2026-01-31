@@ -30,6 +30,7 @@ public class OrderResponse {
     private BigDecimal total;
     private String shippingAddress;
     private String trackingNumber;
+    private String shippingCarrier;
     private String paymentMethod;
     private String notes;
     private LocalDateTime createdAt;
@@ -54,6 +55,7 @@ public class OrderResponse {
                 .total(order.getTotal())
                 .shippingAddress(order.getShippingAddress())
                 .trackingNumber(order.getTrackingNumber())
+                .shippingCarrier(order.getShippingCarrier() != null ? order.getShippingCarrier().name() : null)
                 .paymentMethod(order.getPaymentMethod())
                 .notes(order.getNotes())
                 .createdAt(order.getCreatedAt())

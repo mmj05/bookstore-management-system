@@ -209,16 +209,21 @@ public class OrderService {
                 order.setShippedAt(null);
                 order.setDeliveredAt(null);
                 order.setTrackingNumber(null);
+                order.setShippingCarrier(null);
                 break;
             case PROCESSING:
                 // Clear shipping/delivery timestamps when reverting to processing
                 order.setShippedAt(null);
                 order.setDeliveredAt(null);
                 order.setTrackingNumber(null);
+                order.setShippingCarrier(null);
                 break;
             case SHIPPED:
                 order.setShippedAt(LocalDateTime.now());
                 order.setDeliveredAt(null); // Clear delivery timestamp if reverting from delivered
+                if (request.getShippingCarrier() != null) {
+                    order.setShippingCarrier(request.getShippingCarrier());
+                }
                 if (request.getTrackingNumber() != null) {
                     order.setTrackingNumber(request.getTrackingNumber());
                 }
