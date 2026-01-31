@@ -14,6 +14,7 @@ function ManageOrders() {
   const [showUpdateModal, setShowUpdateModal] = useState(false);
   const [selectedOrder, setSelectedOrder] = useState(null);
   const [newStatus, setNewStatus] = useState('');
+  const [shippingCarrier, setShippingCarrier] = useState('');
   const [trackingNumber, setTrackingNumber] = useState('');
   const [notes, setNotes] = useState('');
 
@@ -42,6 +43,7 @@ function ManageOrders() {
   const openUpdateModal = (order) => {
     setSelectedOrder(order);
     setNewStatus(order.status);
+    setShippingCarrier(order.shippingCarrier || '');
     setTrackingNumber(order.trackingNumber || '');
     setNotes('');
     setShowUpdateModal(true);
@@ -52,6 +54,7 @@ function ManageOrders() {
     try {
       await ordersAPI.updateStatus(selectedOrder.id, {
         status: newStatus,
+        shippingCarrier: shippingCarrier || null,
         trackingNumber: trackingNumber || null,
         notes: notes || null,
       });
@@ -244,16 +247,31 @@ function ManageOrders() {
               </div>
               
               {newStatus === 'SHIPPED' && (
-                <div className="form-group">
-                  <label>Tracking Number</label>
-                  <input
-                    type="text"
-                    className="form-control"
-                    value={trackingNumber}
-                    onChange={(e) => setTrackingNumber(e.target.value)}
-                    placeholder="Enter tracking number"
-                  />
-                </div>
+                <>
+                  <div className="form-group">
+                    <label>Shipping Carrier</label>
+                    <select
+                      className="form-control"
+                      value={shippingCarrier}
+                      onChange={(e) => setShippingCarrier(e.target.value)}
+                    >
+                      <option value="">Select Carrier</option>
+                      <option value="USPS">USPS</option>
+                      <option value="UPS">UPS</option>
+                      <option value="FEDEX">FedEx</option>
+                    </select>
+                  </div>
+                  <div className="form-group">
+                    <label>Tracking Number</label>
+                    <input
+                      type="text"
+                      className="form-control"
+                      value={trackingNumber}
+                      onChange={(e) => setTrackingNumber(e.target.value)}
+                      placeholder="Enter tracking number"
+                    />
+                  </div>
+                </>
               )}
 
               <div className="form-group">

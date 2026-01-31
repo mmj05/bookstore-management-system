@@ -107,6 +107,11 @@ function Orders() {
                   <p style={{ margin: '0 0 5px 0' }}>
                     <strong>Items:</strong> {order.items?.length || 0}
                   </p>
+                  {order.shippingCarrier && (
+                    <p style={{ margin: '0 0 5px 0' }}>
+                      <strong>Carrier:</strong> {order.shippingCarrier}
+                    </p>
+                  )}
                   {order.trackingNumber && (
                     <p style={{ margin: 0 }}>
                       <strong>Tracking:</strong> {order.trackingNumber}
@@ -175,7 +180,10 @@ function Orders() {
                   </div>
 
                   {order.shippedAt && (
-                    <p className="mt-10"><strong>Shipped:</strong> {formatDate(order.shippedAt)}</p>
+                    <p className="mt-10">
+                      <strong>Shipped:</strong> {formatDate(order.shippedAt)}
+                      {order.shippingCarrier && ` via ${order.shippingCarrier}`}
+                    </p>
                   )}
                   {order.deliveredAt && (
                     <p><strong>Delivered:</strong> {formatDate(order.deliveredAt)}</p>
