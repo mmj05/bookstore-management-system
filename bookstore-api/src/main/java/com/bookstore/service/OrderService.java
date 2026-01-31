@@ -202,21 +202,38 @@ public class OrderService {
 
         order.setStatus(newStatus);
 
-        // Update timestamps based on status
-        if (newStatus == OrderStatus.SHIPPED) {
-            order.setShippedAt(LocalDateTime.now());
-            if (request.getTrackingNumber() != null) {
-                order.setTrackingNumber(request.getTrackingNumber());
-            }
-        } else if (newStatus == OrderStatus.DELIVERED) {
-            order.setDeliveredAt(LocalDateTime.now());
-        } else if (newStatus == OrderStatus.CANCELLED) {
-            // Restore inventory
-            for (OrderItem item : order.getItems()) {
-                Book book = item.getBook();
-                book.setQuantity(book.getQuantity() + item.getQuantity());
-                bookRepository.save(book);
-            }
+        // Update timestamps and handle inventory based on status transitions
+        switch (newStatus) {
+            case PENDING:
+                // Clear all progress timestamps when reverting to pending
+                order.setShippedAt(null);
+                order.setDeliveredAt(null);
+                order.setTrackingNumber(null);
+                break;
+            case PROCESSING:
+                // Clear shipping/delivery timestamps when reverting to processing
+                order.setShippedAt(null);
+                order.setDeliveredAt(null);
+                order.setTrackingNumber(null);
+                break;
+            case SHIPPED:
+                order.setShippedAt(LocalDateTime.now());
+                order.setDeliveredAt(null); // Clear delivery timestamp if reverting from delivered
+                if (request.getTrackingNumber() != null) {
+                    order.setTrackingNumber(request.getTrackingNumber());
+                }
+                break;
+            case DELIVERED:
+                order.setDeliveredAt(LocalDateTime.now());
+                break;
+            case CANCELLED:
+                // Restore inventory when cancelling
+                for (OrderItem item : order.getItems()) {
+                    Book book = item.getBook();
+                    book.setQuantity(book.getQuantity() + item.getQuantity());
+                    bookRepository.save(book);
+                }
+                break;
         }
 
         if (request.getNotes() != null) {
@@ -265,16 +282,15 @@ public class OrderService {
     }
 
     private void validateStatusTransition(OrderStatus from, OrderStatus to) {
-        // Define valid transitions
-        boolean valid = switch (from) {
-            case PENDING -> to == OrderStatus.PROCESSING || to == OrderStatus.CANCELLED;
-            case PROCESSING -> to == OrderStatus.SHIPPED || to == OrderStatus.CANCELLED;
-            case SHIPPED -> to == OrderStatus.DELIVERED;
-            case DELIVERED, CANCELLED -> false;
-        };
-
-        if (!valid) {
-            throw new BadRequestException("Invalid status transition from " + from + " to " + to);
+        // Don't allow transitioning to the same status
+        if (from == to) {
+            throw new BadRequestException("Order is already in " + from + " status");
+        }
+        
+        // Allow flexible transitions for managers/admins
+        // Only restriction: cannot transition FROM cancelled (inventory already restored)
+        if (from == OrderStatus.CANCELLED) {
+            throw new BadRequestException("Cannot change status of a cancelled order. Inventory has already been restored.");
         }
     }
 
