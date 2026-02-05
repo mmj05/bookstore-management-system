@@ -1,4 +1,4 @@
-import { useState, useEffect, useCallback } from 'react';
+import { useState, useEffect, useCallback, useRef } from 'react';
 import { Link } from 'react-router-dom';
 import { booksAPI, categoriesAPI } from '../services/api';
 import { useAuth } from '../context/AuthContext';
@@ -75,6 +75,7 @@ function Books() {
   
   const { isAuthenticated, isCustomer } = useAuth();
   const { addToCart } = useCart();
+  const messageRef = useRef(null);
 
   const fetchCategories = async () => {
     try {
@@ -169,6 +170,10 @@ function Books() {
     try {
       await addToCart(bookId, 1);
       setMessage('Book added to cart!');
+      // Scroll to the confirmation message
+      setTimeout(() => {
+        messageRef.current?.scrollIntoView({ behavior: 'smooth', block: 'center' });
+      }, 100);
       setTimeout(() => setMessage(''), 3000);
     } catch (err) {
       setError(err.response?.data?.message || 'Error adding to cart');
@@ -197,7 +202,7 @@ function Books() {
         </p>
       </div>
 
-      {message && <div className="alert alert-success">{message}</div>}
+      {message && <div ref={messageRef} className="alert alert-success">{message}</div>}
       {error && <div className="alert alert-error">{error}</div>}
 
       {/* Search and Filter */}

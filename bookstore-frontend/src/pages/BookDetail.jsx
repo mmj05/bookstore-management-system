@@ -1,4 +1,4 @@
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useRef } from 'react';
 import { useParams, Link, useNavigate } from 'react-router-dom';
 import { booksAPI } from '../services/api';
 import { useAuth } from '../context/AuthContext';
@@ -29,6 +29,7 @@ function BookDetail() {
   
   const { isAuthenticated, isCustomer } = useAuth();
   const { addToCart } = useCart();
+  const messageRef = useRef(null);
 
   // Get a consistent color based on book ID
   const bookColor = book ? bookColors[book.id % bookColors.length] : bookColors[0];
@@ -55,6 +56,10 @@ function BookDetail() {
     try {
       await addToCart(book.id, quantity);
       setMessage('Book added to cart!');
+      // Scroll to the confirmation message
+      setTimeout(() => {
+        messageRef.current?.scrollIntoView({ behavior: 'smooth', block: 'center' });
+      }, 100);
       setTimeout(() => setMessage(''), 3000);
     } catch (err) {
       setError(err.response?.data?.message || 'Error adding to cart');
@@ -108,7 +113,7 @@ function BookDetail() {
         <Link to="/books" className="btn btn-secondary btn-sm">← Back to Books</Link>
       </div>
 
-      {message && <div className="alert alert-success">{message}</div>}
+      {message && <div ref={messageRef} className="alert alert-success">{message}</div>}
 
       <div className="card" style={{ padding: '40px' }}>
         <div className="book-detail-grid">
