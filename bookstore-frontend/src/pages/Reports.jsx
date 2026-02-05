@@ -80,7 +80,7 @@ function Reports() {
           <div className="grid grid-2">
             <div className="card report-stat-card">
               <h4>Total Books</h4>
-              <p className="report-stat-value" style={{ color: '#1e3a5f' }}>
+              <p className="report-stat-value" style={{ color: '#00FFFF' }}>
                 {inventoryReport.totalBooks}
               </p>
             </div>
