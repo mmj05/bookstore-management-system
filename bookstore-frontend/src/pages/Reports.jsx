@@ -214,7 +214,7 @@ function Reports() {
             </div>
             <div className="card report-stat-card">
               <h4>Total Orders</h4>
-              <p className="report-stat-value" style={{ color: '#1e3a5f' }}>
+              <p className="report-stat-value" style={{ color: '#00FFFF' }}>
                 {salesReport.totalOrders}
               </p>
             </div>
